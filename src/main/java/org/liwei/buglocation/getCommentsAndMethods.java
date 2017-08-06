@@ -3,12 +3,12 @@ package org.liwei.buglocation;
 import java.util.List;
 
 import org.liwei.astparser.AstParser;
-import org.liwei.util.FileManage;;
+import org.liwei.util.Util;;
 
 public class getCommentsAndMethods {
 	public static void main(String[] args) {
-		String dirPath = "/Users/liwei/Documents/defect-prediction/working/bad/";
-		List<String> files = FileManage.getAllFiles(dirPath, ".java");
+		String dirPath = "D:\\Data\\working\\bad";
+		List<String> files = Util.getAllFiles(dirPath, ".java");
 		int fileCount = files.size();
 		for (int i = 0; i < fileCount; i++) {
 			genCommentFile(files.get(i));
@@ -23,7 +23,7 @@ public class getCommentsAndMethods {
 	public static void genCommentFile(String sourceFilePath) {
 		try {
 			String destFilePath = sourceFilePath + ".comment";
-			FileManage.writeStringToFile(AstParser.parse(FileManage.readFileToString(sourceFilePath)), destFilePath); 
+			Util.writeStringToFile(AstParser.parse(Util.readFileToString(sourceFilePath)), destFilePath); 
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			System.out.println("file:" + sourceFilePath + " genCommentFile failed!");

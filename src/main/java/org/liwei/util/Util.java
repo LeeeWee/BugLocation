@@ -14,7 +14,7 @@ import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
 
-public class FileManage {
+public class Util {
 	/** 
      * 复制单个文件 
      * @param srcFileName 待复制的文件名 
@@ -136,12 +136,12 @@ public class FileManage {
         for (int i = 0; i < files.length; i++) {  
             // 复制文件  
             if (files[i].isFile()) {  
-                flag = FileManage.copyFile(files[i].getAbsolutePath(),  
+                flag = Util.copyFile(files[i].getAbsolutePath(),  
                         destDirName + files[i].getName(), overlay);  
                 if (!flag)  
                     break;  
             } else if (files[i].isDirectory()) {  
-                flag = FileManage.copyDirectory(files[i].getAbsolutePath(),  
+                flag = Util.copyDirectory(files[i].getAbsolutePath(),  
                         destDirName + files[i].getName(), overlay);  
                 if (!flag)  
                     break;  
@@ -267,4 +267,102 @@ public class FileManage {
 		bw.write(str);
 		bw.close();
 	}
+	
+	public static List<String> readFileToList(String filePath) throws IOException {
+		List<String> stringList = new ArrayList<String>();
+		BufferedReader reader = new BufferedReader(new FileReader(filePath));
+		String line = null;
+		while ((line = reader.readLine()) != null) {
+			stringList.add(line);
+		}
+		reader.close();
+		return stringList;
+	}
+	
+	public static void writeListToFile(List<String> stringList, String filePath) throws IOException {
+		File file = new File(filePath);
+		// if file doesn't exists, then create it
+		if (file.exists()) {
+			file.delete();
+		}
+		file.createNewFile();
+		
+		FileWriter fw = new FileWriter(file.getAbsoluteFile());
+		BufferedWriter bw = new BufferedWriter(fw);
+		for (String str : stringList) {
+			bw.write(str);
+			bw.newLine();
+		}
+		bw.close();
+	}
+	
+	/**
+	 * merge two file into a new file
+	 * @param filePath1  the input first file path
+	 * @param filePath2  the input second file path
+	 * @param destFilePath  the destination file path
+	 */
+	public static void mergeFile(String filePath1, String filePath2, String destFilePath) throws IOException{
+		BufferedWriter writer = new BufferedWriter(new FileWriter(destFilePath));
+		BufferedReader reader = new BufferedReader(new FileReader(filePath1));
+		String line;
+		while ((line = reader.readLine()) != null) {
+			writer.write(line);
+			writer.newLine();
+		}
+		reader.close();
+		reader = new BufferedReader(new FileReader(filePath2));
+		while ((line = reader.readLine()) != null) {
+			writer.write(line);
+			writer.newLine();
+		}
+		reader.close();
+		writer.close();
+	}
+	
+	/**
+	 * store each line of file into an list
+	 * @param file   given file
+	 * @return  a list of file's all lines
+	 */
+	public static List<String> asList(File file) throws IOException{
+		List<String> result = new ArrayList<String>();
+		BufferedReader reader = new BufferedReader(new FileReader(file));
+		String line;
+		while ((line = reader.readLine()) != null) {
+			result.add(line);
+		}
+		reader.close();
+		return result;
+	}
+	
+	/**
+	 * split documents
+	 * @param inputPath input file path
+	 * @param cores  num of documents to split 
+	 * @return a list of list 
+	 */
+	public static List<List<String>> spiltDocuments(String inputPath, int cores) throws IOException {
+		List<String> document = Util.readFileToList(inputPath);
+		int averN = document.size() / cores;
+		List<List<String>> splitDocument = new ArrayList<List<String>>();
+		for (int i = 0; i < cores; i++) {
+			List<String> texts = new ArrayList<String>();
+			splitDocument.add(texts);
+		}
+		int n = 0;
+		int core = 0;
+		List<String> texts = splitDocument.get(core);
+		for (int i = 0; i < document.size(); i++) {
+			texts.add(document.get(i));
+			n++;
+			if (n > averN && core < cores) {
+				n = 0;
+				core++;
+				texts = splitDocument.get(core);
+			}
+		}
+		return splitDocument;
+	}
+	
 }

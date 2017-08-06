@@ -1,7 +1,7 @@
 package org.liwei.astparser;
 
 
-import org.liwei.util.FileManage;
+import org.liwei.util.Util;
 
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTParser;
@@ -56,7 +56,7 @@ public class AstParser {
 	public static void main(String[] args) {
 		try {
 			String filePath = "/Users/liwei/Documents/defect-prediction/open-source/eclipse.jdt.ui/org.eclipse.jdt.ui/ui/org/eclipse/jdt/ui/text/java/AbstractProposalSorter.java";
-			parse(FileManage.readFileToString(filePath));
+			parse(Util.readFileToString(filePath));
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
