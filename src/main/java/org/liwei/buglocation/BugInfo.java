@@ -1,6 +1,8 @@
 package org.liwei.buglocation;
 
+import java.io.BufferedWriter;
 import java.io.FileInputStream;
+import java.io.FileWriter;
 import java.io.InputStream;
 import java.util.Date;
 import java.text.DecimalFormat;
@@ -132,13 +134,19 @@ public class BugInfo {
 	
 	public static void main(String[] args) {
 		List<BugInfo> bugInfoList = getBugInfoFromExcel("D:\\Data\\dataset\\JDT.xlsx");
-		String destPath = "D:\\Data\\working\\bug_report.s";
+		String destPath = "D:\\Data\\working\\bug_report.txt";
+		String IndexPath = "D:\\Data\\working\\bug_report.i";
 		String summ_Desc = new String();
-		for (BugInfo bugInfo : bugInfoList) {
-			String summary = bugInfo.summary.replaceAll("^Bug \\d+ ", "");
-			summ_Desc = summ_Desc + summary + " " + bugInfo.description + "\n";
-		}
 		try {
+			BufferedWriter writer = new BufferedWriter(new FileWriter(IndexPath));
+			int lineNumber = 0;
+			for (BugInfo bugInfo : bugInfoList) {
+				writer.write(lineNumber + " " + bugInfo.bugId + "\n");
+				String summary = bugInfo.summary.replaceAll("^Bug \\d+ ", "");
+				summ_Desc = summ_Desc + summary + " " + bugInfo.description + "\n";
+				lineNumber++;
+			}
+			writer.close();
 			Util.writeStringToFile(summ_Desc, destPath);
 		} catch (Exception e) {
 			e.printStackTrace();

@@ -17,19 +17,45 @@ import org.nd4j.linalg.api.ndarray.INDArray;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * gengerate document vectors
+ * @author Liwei
+ *
+ */
 public class TfidfProcess {
 
 	private Logger log = LoggerFactory.getLogger(TfidfProcess.class);
+	
+	/**
+	 * path to the input text file to be vectorize
+	 */
+	private String input;
+	
+	/**
+	 * output path of the vectors file
+	 */
+	private String output;
 
+	/**
+	 * words vectors dimensions
+	 */
 	private int numOutput;
 
-	private String input;
-	private String output;
+	/**
+	 * path to the stopwords file
+	 */
 	private String stopWordsFilePath;
+
+	/**
+	 * path to the word2vec model file
+	 */
 	private String word2VecModelPath;
 
 	private TfidfVectorizer tfidf;
 
+	/**
+	 * constructor
+	 */
 	public TfidfProcess(int numOutput, String input, String output, String stopWordsFilePath,
 			String word2VecModelPath) {
 		this.numOutput = numOutput;
@@ -39,6 +65,9 @@ public class TfidfProcess {
 		this.word2VecModelPath = word2VecModelPath;
 	}
 
+	/**
+	 * train tfidf model
+	 */
 	public void train() throws Exception {
 		String tfidfPath = input.subSequence(0, input.lastIndexOf(".")) + ".tfidf";
 		List<String> stopWords = Util.asList(new File(stopWordsFilePath));
@@ -47,8 +76,8 @@ public class TfidfProcess {
 		TokenizerFactory t = new DefaultTokenizerFactory();
 		t.setTokenPreProcessor(new CommonPreprocessor());
 		log.info("Building model...");
-		tfidf = new TfidfVectorizer.Builder().setMinWordFrequency(5).setIterator(iter)
-				.setTokenizerFactory(t).setStopWords(stopWords).build();
+		tfidf = new TfidfVectorizer.Builder().setMinWordFrequency(5).setIterator(iter).setTokenizerFactory(t)
+				.setStopWords(stopWords).build();
 		log.info("Fitting Tfidf model...");
 		tfidf.fit();
 
@@ -60,6 +89,12 @@ public class TfidfProcess {
 		return tfidf;
 	}
 
+	/**
+	 * generate vector for each line of file
+	 * 
+	 * @return
+	 * @throws Exception
+	 */
 	public List<INDArray> vectorize() throws Exception {
 		List<INDArray> result = new ArrayList<INDArray>();
 		train();
@@ -106,7 +141,7 @@ public class TfidfProcess {
 		return result;
 	}
 
-	public static void main(String[] args) throws Exception{
+	public static void main(String[] args) throws Exception {
 		int numOutput = 200;
 		String input = "D:\\Data\\working\\total.s";
 		String output = "D:\\Data\\working\\total.v";

@@ -17,6 +17,10 @@ import org.deeplearning4j.text.tokenization.tokenizer.preprocessor.CommonPreproc
 import org.deeplearning4j.text.tokenization.tokenizerfactory.DefaultTokenizerFactory;
 import org.deeplearning4j.text.tokenization.tokenizerfactory.TokenizerFactory;
 
+/**
+ * generate word2vector model
+ * @author Liwei
+ */
 public class GenWord2Vec {
 	private static Logger log = LoggerFactory.getLogger(GenWord2Vec.class);
 	

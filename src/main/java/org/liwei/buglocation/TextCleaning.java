@@ -9,12 +9,12 @@ import java.util.List;
 import org.liwei.util.Util;
 
 public class TextCleaning {
-	
+
 	private static List<String> stopWords = new ArrayList<String>();
-	
+
 	public static void main(String[] args) {
 		String path = "D:\\Data\\working\\bad\\";
-		String destPath =  "D:\\Data\\working\\bad.s";
+		String destPath = "D:\\Data\\working\\bad.txt";
 		initializeStopWords();
 		List<String> commentFiles = Util.getAllFiles(path, ".comment");
 		String allComments = new String();
@@ -25,7 +25,7 @@ public class TextCleaning {
 			String fileName = commentFile.substring(commentFile.lastIndexOf(File.separator) + 1);
 			String file = fileName.substring(0, fileName.lastIndexOf("#")).replace("#", "/") + ".java";
 			String commit = fileName.substring(fileName.lastIndexOf("#") + 1, fileName.indexOf(".java.comment"));
-			String info = commit + " " + file + "\n";
+			String info = String.valueOf(i) + " " + commit + " " + file + "\n";
 			infos = infos + info;
 			if (i % 500 == 0) {
 				System.out.println("Text cleaning processing:" + i + "/" + commentFiles.size());
@@ -37,8 +37,15 @@ public class TextCleaning {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-	} 
-	
+	}
+
+	/**
+	 * remove digits, symbols and stopwords of text
+	 * 
+	 * @param commentFile
+	 *            input text string to be cleaned
+	 * @return
+	 */
 	public static String textCleaning(String commentFile) {
 		String resultStr = new String();
 		String tempStr = new String();
@@ -55,7 +62,7 @@ public class TextCleaning {
 				tempStr = tempStr + line;
 			}
 			br.close();
-		}catch (Exception e) {
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
 		String[] words = tempStr.split("\\s+");
@@ -65,8 +72,10 @@ public class TextCleaning {
 		resultStr = resultStr.replaceAll("\\s+", " ").toLowerCase().trim();
 		return resultStr;
 	}
-	
 
+	/**
+	 * initial the stopwords
+	 */
 	public static void initializeStopWords() {
 		stopWords.add("@param");
 		stopWords.add("@return");
@@ -88,16 +97,17 @@ public class TextCleaning {
 
 		stopWords.add("@\n");
 	}
-	
+
 	/**
 	 * 分割单词，将多个单词组成的组合单词分成对应的单个单词
+	 * 
 	 * @param 输入的单词
 	 * @return 返回分割的单词
 	 */
 	public static String splitName(String word) {
 		int k = 0;
 		String splitWord = new String();
-		for (int i = 1; i < word.length()-1; i++) {
+		for (int i = 1; i < word.length() - 1; i++) {
 			char preC = word.charAt(i - 1);
 			char tempC = word.charAt(i);
 			char nextC = word.charAt(i + 1);

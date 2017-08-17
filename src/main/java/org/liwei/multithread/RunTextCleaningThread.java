@@ -13,8 +13,8 @@ public class RunTextCleaningThread extends RunAbstractThread{
 	}
 	
 	public static void main(String[] args) throws Exception {
-		String inputPath = "D:\\data\\working\\bug_report.s";
-		String outputPath = "D:\\data\\working\\bug_report1.s";
+		String inputPath = "D:\\data\\working\\bug_report.txt";
+		String outputPath = "D:\\data\\working\\bug_report.s";
 		RunTextCleaningThread rlt = new RunTextCleaningThread(inputPath, outputPath);
 		rlt.runThread();
 	}

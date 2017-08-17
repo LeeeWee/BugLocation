@@ -19,9 +19,9 @@
 						<descriptorRef>jar-with-dependencies</descriptorRef>
 					</descriptorRefs>
 					<archive>
-						<manifest>
+						<!-- <manifest>
 							<mainClass>com.cetc.di.App</mainClass>
-						</manifest>
+						</manifest> -->
 					</archive>
 				</configuration>
 				<executions>

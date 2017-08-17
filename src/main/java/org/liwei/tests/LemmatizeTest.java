@@ -1,3 +1,4 @@
+package org.liwei.tests;
 import java.util.List;
 import java.util.Properties;
 
@@ -12,7 +13,7 @@ import edu.stanford.nlp.pipeline.Annotation;
 import edu.stanford.nlp.pipeline.StanfordCoreNLP;
 import edu.stanford.nlp.util.CoreMap;
 
-public class Test {
+public class LemmatizeTest {
 	   public static void main(String[] args) {
 		   Properties props = new Properties();  
 		   props.put("annotators", "tokenize,ssplit,pos,lemma");  

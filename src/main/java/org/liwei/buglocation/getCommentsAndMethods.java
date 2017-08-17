@@ -16,7 +16,7 @@ public class getCommentsAndMethods {
 				System.out.println("genCommentFiles:" + i + "/" + fileCount);
 			}
 		}
-		System.out.println("gencCommentFiles finished!");
+		System.out.println("genCommentFiles finished!");
 	}
 	
 	
