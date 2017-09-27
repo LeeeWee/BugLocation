@@ -12,6 +12,7 @@ import org.deeplearning4j.text.sentenceiterator.SentenceIterator;
 import org.deeplearning4j.text.tokenization.tokenizer.preprocessor.CommonPreprocessor;
 import org.deeplearning4j.text.tokenization.tokenizerfactory.DefaultTokenizerFactory;
 import org.deeplearning4j.text.tokenization.tokenizerfactory.TokenizerFactory;
+import org.deeplearning4j.util.SerializationUtils;
 import org.liwei.util.Util;
 import org.nd4j.linalg.api.ndarray.INDArray;
 import org.slf4j.Logger;
@@ -68,21 +69,34 @@ public class TfidfProcess {
 	/**
 	 * train tfidf model
 	 */
-	public void train() throws Exception {
-		String tfidfPath = input.subSequence(0, input.lastIndexOf(".")) + ".tfidf";
+	public void train(String tfidfPath) throws Exception {
 		List<String> stopWords = Util.asList(new File(stopWordsFilePath));
 		SentenceIterator iter = new BasicLineIterator(input);
 		// Split on white spaces in the line to get words
 		TokenizerFactory t = new DefaultTokenizerFactory();
 		t.setTokenPreProcessor(new CommonPreprocessor());
 		log.info("Building model...");
-		tfidf = new TfidfVectorizer.Builder().setMinWordFrequency(5).setIterator(iter).setTokenizerFactory(t)
-				.setStopWords(stopWords).build();
+		tfidf = new TfidfVectorizer.Builder()
+				.setMinWordFrequency(5)
+				.setIterator(iter)
+				.setTokenizerFactory(t)
+				.setStopWords(stopWords)
+				.build();
 		log.info("Fitting Tfidf model...");
 		tfidf.fit();
 
-		// log.info("Writing tfidf vectors to text file....");
-
+		log.info("Writing tfidf vectors to text file....");
+		SerializationUtils.saveObject(tfidf, new File(tfidfPath));
+	}
+	
+	/**
+	 * 
+	 * @param tfidfModel
+	 * @return
+	 */
+	public TfidfVectorizer loadTfidfModel(File tfidfModel) {
+		TfidfVectorizer tfidf = SerializationUtils.readObject(tfidfModel);
+		return tfidf;
 	}
 
 	public TfidfVectorizer getTfidfModel() {
@@ -97,7 +111,11 @@ public class TfidfProcess {
 	 */
 	public List<INDArray> vectorize() throws Exception {
 		List<INDArray> result = new ArrayList<INDArray>();
-		train();
+		// Set tfidf model path, train tfidf model.
+		String tfidfPath = input.subSequence(0, input.lastIndexOf(".")) + ".tfidf";
+		train(tfidfPath);
+		
+		// Creat multi threads to vectorize documents.
 		int cores = Runtime.getRuntime().availableProcessors();
 		TfidfThread[] threads = new TfidfThread[cores];
 		List<List<String>> documents = Util.spiltDocuments(input, cores);
@@ -143,8 +161,8 @@ public class TfidfProcess {
 
 	public static void main(String[] args) throws Exception {
 		int numOutput = 200;
-		String input = "D:\\Data\\working\\total.s";
-		String output = "D:\\Data\\working\\total.v";
+		String input = "D:\\Data\\working\\bug_report.s";
+		String output = "D:\\Data\\working\\bug_report.v";
 		String stopWordsFilePath = "D:\\Data\\stopwords.txt";
 		String word2VecModelPath = "D:\\Data\\working\\wordvec_d200e60.v";
 
