@@ -1,11 +1,19 @@
 package org.liwei.buglocation;
 
+import java.io.BufferedWriter;
+import java.io.FileOutputStream;
+import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map.Entry;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class GetChangeHistory {
+	private static Logger logger = LoggerFactory.getLogger(GetChangeHistory.class);
 
 	/**
 	 * Get file change history in bugInfo list.
@@ -26,6 +34,36 @@ public class GetChangeHistory {
 			}
 		}
 		return history;
+	}
+	
+	/**
+	 * Write files path and related change date to file.
+	 * @param filesChangeHistory Map file path to related changed date.
+	 * @param filePath Given path to write history.
+	 */
+	public static void writeHistoryToFile(HashMap<String, List<Date>> filesChangeHistory, String filePath) {
+		logger.info("Begin writing history to file.");
+		try {
+			BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(filePath), "utf-8"));
+			for (Entry<String, List<Date>> entry : filesChangeHistory.entrySet()) {
+				writer.write(entry.getKey());
+				for (Date date : entry.getValue()) {
+					writer.write(", " + date.getTime());
+				}
+				writer.newLine();
+			}
+			writer.close();
+			logger.info("Finshed Writed!");
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+	
+	public static void main(String[] args) {
+		List<BugInfo> bugInfoList = BugInfo.getBugInfoFromExcel("D:\\Data\\dataset\\JDT.xlsx");
+		String filePath = "D:\\Data\\working\\file.history";
+		HashMap<String, List<Date>> filesChangeHistory = filesChangeHistory(bugInfoList);
+		writeHistoryToFile(filesChangeHistory, filePath);
 	}
 	
 }
