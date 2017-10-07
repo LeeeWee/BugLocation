@@ -62,7 +62,7 @@ public class BugInfo {
 	 */
 	private static List<String> extractFilesFromString(String filesString) {
 		List<String> filesList = new ArrayList<String>();
-		String[] files = filesString.split(".java");
+		String[] files = filesString.split("\\.java ");
 		for (int i = 0; i < files.length; i++) {
 				filesList.add(files[i].trim() + ".java");
 		}

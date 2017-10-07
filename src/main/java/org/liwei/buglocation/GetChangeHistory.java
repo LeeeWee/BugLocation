@@ -1,6 +1,7 @@
 package org.liwei.buglocation;
 
 import java.io.BufferedWriter;
+import java.io.File;
 import java.io.FileOutputStream;
 import java.io.OutputStreamWriter;
 import java.util.ArrayList;
@@ -46,7 +47,7 @@ public class GetChangeHistory {
 		try {
 			BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(filePath), "utf-8"));
 			for (Entry<String, List<Date>> entry : filesChangeHistory.entrySet()) {
-				writer.write(entry.getKey());
+				writer.write("eclipse.jdt.ui/" + entry.getKey());
 				for (Date date : entry.getValue()) {
 					writer.write(", " + date.getTime());
 				}

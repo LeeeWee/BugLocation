@@ -18,6 +18,8 @@ public class Index {
 	
 	private INDArray vector;
 	
+	private String text;
+	
 	public Index(String line) {
 		String[] values = line.split(" ");
 		this.indexNumber = Integer.parseInt(values[0]);
@@ -28,11 +30,11 @@ public class Index {
 	}
 	
 	public String getBugId() {
-		return this.bugId;
+		return bugId;
 	}
 	
 	public String getPath() {
-		return this.path;
+		return path;
 	}
 	
 	public void setVector(INDArray vector) {
@@ -40,7 +42,11 @@ public class Index {
 	}
 	
 	public INDArray getVector() {
-		return this.vector;
+		return vector;
+	}
+	
+	public String getText() {
+		return text;
 	}
 	
 	/**
@@ -68,7 +74,7 @@ public class Index {
 	 * get indices of file and attach vector
 	 * @param indexFile  index File
 	 * @param vectorFile  vector File
-	 * @return
+	 * @return map of indices
 	 */
 	public static HashMap<Integer, Index> readIndices(File indexFile, File vectorFile) {
 		HashMap<Integer, Index> indices = null;
@@ -84,5 +90,25 @@ public class Index {
 		return indices;
 	}
 	
+	/**
+	 * get indices of file and attach vector
+	 * @param indexFile  input index File
+	 * @param vectorFile  input vector File
+	 * @param textFile input text file
+	 * @return map of indices
+	 */
+	public static HashMap<Integer, Index> readIndices(File indexFile, File vectorFile, File textFile) {
+		HashMap<Integer, Index> indices = null;
+		try {
+			indices = readIndices(indexFile);
+			VectorFile vf = new VectorFile(vectorFile);
+			for (Entry<Integer, Index> index : indices.entrySet()) {
+				index.getValue().setVector(vf.get(index.getKey()));
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return indices;
+	}
 	
 }

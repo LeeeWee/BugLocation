@@ -13,10 +13,14 @@ public class TextCleaning {
 	private static List<String> stopWords = new ArrayList<String>();
 
 	public static void main(String[] args) {
-		String path = "D:\\Data\\working\\bad\\";
-		String destPath = "D:\\Data\\working\\bad.txt";
+		String dirPath = "D:\\Data\\working\\good\\";
+		String destPath = "D:\\Data\\working\\good.txt";
+		cleanGoodFiles(dirPath, destPath);
+	}
+	
+	public static void cleanBadFiles(String dirPath, String destPath) {
 		initializeStopWords();
-		List<String> commentFiles = Util.getAllFiles(path, ".comment");
+		List<String> commentFiles = Util.getAllFiles(dirPath, ".comment");
 		String allComments = new String();
 		String infos = new String();
 		for (int i = 0; i < commentFiles.size(); i++) {
@@ -39,6 +43,29 @@ public class TextCleaning {
 		}
 	}
 
+	public static void cleanGoodFiles(String dirPath, String destPath) {
+		initializeStopWords();
+		List<String> commentFiles = Util.getAllFiles(dirPath, ".comment");
+		String allComments = new String();
+		String infos = new String();
+		for (int i = 0; i < commentFiles.size(); i++) {
+			String commentFile = commentFiles.get(i);
+			allComments = allComments + textCleaning(commentFile) + "\n";
+			String fileName = commentFile.substring(commentFile.lastIndexOf(File.separator) + 1, commentFile.lastIndexOf(".")).replace("#", "/");
+			String info = String.valueOf(i) + " 000000 " + fileName + "\n";
+			infos = infos + info;
+			if (i % 500 == 0) {
+				System.out.println("Text cleaning processing:" + i + "/" + commentFiles.size());
+			}
+		}
+		try {
+			Util.writeStringToFile(allComments, destPath);
+			Util.writeStringToFile(infos, destPath.substring(0, destPath.lastIndexOf(".")) + ".i");
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+	
 	/**
 	 * remove digits, symbols and stopwords of text
 	 * 

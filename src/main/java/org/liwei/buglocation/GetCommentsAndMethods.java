@@ -5,9 +5,9 @@ import java.util.List;
 import org.liwei.astparser.AstParser;
 import org.liwei.util.Util;;
 
-public class getCommentsAndMethods {
+public class GetCommentsAndMethods {
 	public static void main(String[] args) {
-		String dirPath = "D:\\Data\\working\\bad";
+		String dirPath = "D:\\Data\\working\\good";
 		List<String> files = Util.getAllFiles(dirPath, ".java");
 		int fileCount = files.size();
 		for (int i = 0; i < fileCount; i++) {
