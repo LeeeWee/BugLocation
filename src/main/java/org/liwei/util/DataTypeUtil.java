@@ -4,7 +4,7 @@ import java.util.Comparator;
 
 public class DataTypeUtil {
 
-	public class TokenScore {
+	public static class TokenScore {
 		public String token;
 		public double score;
 		public double idf;
@@ -22,6 +22,10 @@ public class DataTypeUtil {
 			this.token = token;
 			this.score = score;
 			this.idf = idf;
+		}
+		
+		public String toString() {
+			return token + " " + String.format("%.3f", score) + " " + String.format("%.3f", idf);
 		}
 		
 	}

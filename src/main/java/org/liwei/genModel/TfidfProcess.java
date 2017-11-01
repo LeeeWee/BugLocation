@@ -188,8 +188,8 @@ public class TfidfProcess {
 
 	public static void main(String[] args) throws Exception {
 		int numOutput = 200;
-		String input = "D:\\Data\\working\\bug_report.s";
-		String output = "D:\\Data\\working\\bug_report.v";
+		String input = "D:\\Data\\working\\bad.s";
+		String output = "D:\\Data\\working\\bad.v";
 		String stopWordsFilePath = "D:\\Data\\stopwords.txt";
 		String word2VecModelPath = "D:\\Data\\working\\wordvec_d200e60.v";
 
