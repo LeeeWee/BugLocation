@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.liwei.util.Util;
+import org.liwei.util.FileUtil;
 
 public abstract class RunAbstractThread {
 	private String inputPath;
@@ -49,13 +49,13 @@ public abstract class RunAbstractThread {
 			}
 			
 		}
-		Util.writeListToFile(result, outputPath);
+		FileUtil.writeListToFile(result, outputPath);
 		return result;
 	} 
 	
 	
 	private List<List<String>> spiltDocuments(String inputPath, int cores) throws IOException {
-		List<String> document = Util.readFileToList(inputPath);
+		List<String> document = FileUtil.readFileToList(inputPath);
 		int averN = document.size() / cores;
 		List<List<String>> splitDocument = new ArrayList<List<String>>();
 		int n = 0;

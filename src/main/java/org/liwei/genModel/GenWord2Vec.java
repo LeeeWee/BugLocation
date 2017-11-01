@@ -1,6 +1,6 @@
 package org.liwei.genModel;
 
-import org.liwei.util.Util;
+import org.liwei.util.FileUtil;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,7 +28,7 @@ public class GenWord2Vec {
 		String filePath = "D:\\Data\\working\\total.s";
 		String vecPath = "D:\\Data\\working\\total.v";
 		String stopWordsFilePath = "D:\\data\\stopwords.txt";
-		List<String> stopWords = Util.asList(new File(stopWordsFilePath)); 
+		List<String> stopWords = FileUtil.asList(new File(stopWordsFilePath)); 
 		log.info("Load & Vectorize Sentences....");
 		SentenceIterator iter = new BasicLineIterator(filePath);
 		// Split on white spaces in the line to get words

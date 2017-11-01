@@ -7,7 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import org.liwei.util.Util;;
+import org.liwei.util.FileUtil;;
 
 public class GetChangedFiles {
 	
@@ -79,7 +79,7 @@ public class GetChangedFiles {
 		System.out.println("Copying " + repoName + " to working path.");
 		if (!destPath.endsWith(File.separator)) 
 			destPath = destPath + File.separator;
-		Util.copyDirectory(repoPath, destPath + "work" + File.separator + repoName, true);
+		FileUtil.copyDirectory(repoPath, destPath + "work" + File.separator + repoName, true);
 		System.out.println("Finished Copying");
 		
 		
@@ -105,7 +105,7 @@ public class GetChangedFiles {
 				String changedFileName = file.replace('/', '#').substring(0, file.lastIndexOf("."));
 				String destFileName = destPath + "bad" + File.separator + repoName + "#" + changedFileName + "#" + bugInfo.commit + ".java";
 				String sourceFilePath = destPath + "work" + File.separator + repoName + File.separator + file;
-				Util.copyFile(sourceFilePath, destFileName, true);
+				FileUtil.copyFile(sourceFilePath, destFileName, true);
 			}
 			if (i % 500 == 0) {
 				System.out.println("Processed bugs:" + i + "/" + bugInfoList.size());	

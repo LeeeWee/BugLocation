@@ -1,10 +1,10 @@
 package org.liwei.genModel;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.deeplearning4j.bagofwords.vectorizer.TfidfVectorizer;
+import org.deeplearning4j.models.embeddings.wordvectors.WordVectors;
 import org.nd4j.linalg.api.ndarray.INDArray;
 
 public class TfidfThread extends TfidfInferer implements Runnable{
@@ -16,9 +16,9 @@ public class TfidfThread extends TfidfInferer implements Runnable{
 	private List<INDArray> result;
 	private boolean isFinished;
 
-	public TfidfThread(int threadSerial, List<String> document, TfidfVectorizer tfidf, File word2VecModelFile,
-			int numOutput) throws Exception {
-		super(tfidf, word2VecModelFile, numOutput);
+	public TfidfThread(int threadSerial, List<String> document, TfidfVectorizer tfidf, WordVectors wordVec,
+			List<String> stopWords, int numOutput) throws Exception {
+		super(tfidf, wordVec, stopWords, numOutput);
 		this.threadSerial = threadSerial;
 		this.document = document;
 	}

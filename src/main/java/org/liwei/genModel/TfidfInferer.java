@@ -10,17 +10,21 @@ import java.util.PriorityQueue;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.deeplearning4j.bagofwords.vectorizer.TfidfVectorizer;
-import org.deeplearning4j.models.embeddings.wordvectors.WordVectors;
 import org.deeplearning4j.models.embeddings.loader.WordVectorSerializer;
+import org.deeplearning4j.models.embeddings.wordvectors.WordVectors;
 import org.deeplearning4j.text.tokenization.tokenizer.Tokenizer;
-import org.deeplearning4j.text.tokenization.tokenizer.preprocessor.CommonPreprocessor;
 import org.deeplearning4j.text.tokenization.tokenizerfactory.DefaultTokenizerFactory;
 import org.deeplearning4j.text.tokenization.tokenizerfactory.TokenizerFactory;
 import org.deeplearning4j.util.MathUtils;
+import org.liwei.util.FileUtil;
+import org.liwei.util.StopWordsPreprocessor;
 import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.factory.Nd4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class TfidfInferer {
+	private static Logger log = LoggerFactory.getLogger(TfidfInferer.class);
 	/**
 	 * default value:top n largest tfidf words 
 	 */
@@ -33,6 +37,7 @@ public class TfidfInferer {
 	private WordVectors vec;
 	private TfidfVectorizer tfidf;
 	private TokenizerFactory tokenizerFactory;
+	private List<String> stopWords;
 	
 	public class TfidfScore {
 		private String word;
@@ -50,7 +55,7 @@ public class TfidfInferer {
 	
 	static class TfdifComparator implements Comparator<TfidfScore> {
 		public int compare(TfidfScore tfidf1, TfidfScore tfidf2) {
-			if (tfidf1.score < tfidf1.score) 
+			if (tfidf1.score < tfidf2.score) 
 				return 1;
 			else if (tfidf1.score > tfidf2.score)
 				return -1;
@@ -64,12 +69,22 @@ public class TfidfInferer {
 	 * @param tfidf tfidf vectorizer
 	 * @param word2VecModelFile  word2vec model file
 	 */
-	public TfidfInferer(TfidfVectorizer tfidf, File word2VecModelFile, int numOutput) throws Exception{
-		this.vec = WordVectorSerializer.loadTxtVectors(word2VecModelFile);
+	public TfidfInferer(TfidfVectorizer tfidf, File word2VecModelFile, File stopWordsFile, int numOutput) throws Exception{
 		this.tfidf = tfidf;
+		this.vec = WordVectorSerializer.loadTxtVectors(word2VecModelFile);
+		this.stopWords = FileUtil.asList(stopWordsFile);
 		this.numOutput = numOutput;
 		this.tokenizerFactory = new DefaultTokenizerFactory();
-		tokenizerFactory.setTokenPreProcessor(new CommonPreprocessor());
+		tokenizerFactory.setTokenPreProcessor(new StopWordsPreprocessor(stopWords));
+	}
+	
+	public TfidfInferer(TfidfVectorizer tfidf, WordVectors vec, List<String> stopWords, int numOutput) {
+		this.tfidf = tfidf;
+		this.vec = vec;
+		this.stopWords = stopWords;
+		this.numOutput = numOutput;
+		this.tokenizerFactory = new DefaultTokenizerFactory();
+		tokenizerFactory.setTokenPreProcessor(new StopWordsPreprocessor(stopWords));
 	}
 	
 	public INDArray vectorize(String text) {

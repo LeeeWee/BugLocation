@@ -6,7 +6,7 @@ import java.io.FileReader;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.liwei.util.Util;
+import org.liwei.util.FileUtil;
 
 public class TextCleaning {
 
@@ -20,7 +20,7 @@ public class TextCleaning {
 	
 	public static void cleanBadFiles(String dirPath, String destPath) {
 		initializeStopWords();
-		List<String> commentFiles = Util.getAllFiles(dirPath, ".comment");
+		List<String> commentFiles = FileUtil.getAllFiles(dirPath, ".comment");
 		String allComments = new String();
 		String infos = new String();
 		for (int i = 0; i < commentFiles.size(); i++) {
@@ -36,8 +36,8 @@ public class TextCleaning {
 			}
 		}
 		try {
-			Util.writeStringToFile(allComments, destPath);
-			Util.writeStringToFile(infos, destPath.substring(0, destPath.lastIndexOf(".")) + ".i");
+			FileUtil.writeStringToFile(allComments, destPath);
+			FileUtil.writeStringToFile(infos, destPath.substring(0, destPath.lastIndexOf(".")) + ".i");
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -45,7 +45,7 @@ public class TextCleaning {
 
 	public static void cleanGoodFiles(String dirPath, String destPath) {
 		initializeStopWords();
-		List<String> commentFiles = Util.getAllFiles(dirPath, ".comment");
+		List<String> commentFiles = FileUtil.getAllFiles(dirPath, ".comment");
 		String allComments = new String();
 		String infos = new String();
 		for (int i = 0; i < commentFiles.size(); i++) {
@@ -59,8 +59,8 @@ public class TextCleaning {
 			}
 		}
 		try {
-			Util.writeStringToFile(allComments, destPath);
-			Util.writeStringToFile(infos, destPath.substring(0, destPath.lastIndexOf(".")) + ".i");
+			FileUtil.writeStringToFile(allComments, destPath);
+			FileUtil.writeStringToFile(infos, destPath.substring(0, destPath.lastIndexOf(".")) + ".i");
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

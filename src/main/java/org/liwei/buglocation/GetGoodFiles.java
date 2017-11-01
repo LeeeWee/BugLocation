@@ -3,7 +3,7 @@ package org.liwei.buglocation;
 import java.io.File;
 import java.util.List;
 
-import org.liwei.util.Util;
+import org.liwei.util.FileUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -23,7 +23,7 @@ public class GetGoodFiles {
 			goodPath += File.separator;
 		String directory = repoPath.substring(0, repoPath.lastIndexOf("\\"));
 		// get all java file in repository
-		List<String> javaFiles = Util.getAllFiles(repoPath, "java");
+		List<String> javaFiles = FileUtil.getAllFiles(repoPath, "java");
 		
 		// write java files to good path
 		int count = 0;
@@ -34,7 +34,7 @@ public class GetGoodFiles {
 			String fileName = javaFile.substring(directory.length() + 1);
 			String destPath = goodPath + fileName.replace(File.separatorChar, '#');
 //			logger.info("Copying " + fileName + " to good path.");
-			Util.copyFile(javaFile, destPath, true);
+			FileUtil.copyFile(javaFile, destPath, true);
 		}
 		System.out.println("Finished copying! Total copy " + javaFiles.size() + " files");
 	}

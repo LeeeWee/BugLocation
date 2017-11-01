@@ -7,13 +7,15 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.deeplearning4j.bagofwords.vectorizer.TfidfVectorizer;
+import org.deeplearning4j.models.embeddings.loader.WordVectorSerializer;
+import org.deeplearning4j.models.embeddings.wordvectors.WordVectors;
 import org.deeplearning4j.text.sentenceiterator.BasicLineIterator;
 import org.deeplearning4j.text.sentenceiterator.SentenceIterator;
 import org.deeplearning4j.text.tokenization.tokenizer.preprocessor.CommonPreprocessor;
 import org.deeplearning4j.text.tokenization.tokenizerfactory.DefaultTokenizerFactory;
 import org.deeplearning4j.text.tokenization.tokenizerfactory.TokenizerFactory;
 import org.deeplearning4j.util.SerializationUtils;
-import org.liwei.util.Util;
+import org.liwei.util.FileUtil;
 import org.nd4j.linalg.api.ndarray.INDArray;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,7 +27,7 @@ import org.slf4j.LoggerFactory;
  */
 public class TfidfProcess {
 
-	private Logger log = LoggerFactory.getLogger(TfidfProcess.class);
+	private static final Logger logger = LoggerFactory.getLogger(TfidfProcess.class);
 	
 	/**
 	 * path to the input text file to be vectorize
@@ -43,16 +45,15 @@ public class TfidfProcess {
 	private int numOutput;
 
 	/**
-	 * path to the stopwords file
-	 */
-	private String stopWordsFilePath;
-
-	/**
 	 * path to the word2vec model file
 	 */
 	private String word2VecModelPath;
 
 	private TfidfVectorizer tfidf;
+	
+	private List<String> stopWords;
+	
+	private WordVectors vec;
 
 	/**
 	 * constructor
@@ -62,47 +63,70 @@ public class TfidfProcess {
 		this.numOutput = numOutput;
 		this.input = input;
 		this.output = output;
-		this.stopWordsFilePath = stopWordsFilePath;
 		this.word2VecModelPath = word2VecModelPath;
+		this.stopWords = FileUtil.asList(new File(stopWordsFilePath));
 	}
 
 	/**
 	 * train tfidf model
 	 */
 	public void train(String tfidfPath) throws Exception {
-		List<String> stopWords = Util.asList(new File(stopWordsFilePath));
 		SentenceIterator iter = new BasicLineIterator(input);
 		// Split on white spaces in the line to get words
 		TokenizerFactory t = new DefaultTokenizerFactory();
 		t.setTokenPreProcessor(new CommonPreprocessor());
-		log.info("Building model...");
+		logger.info("Building model...");
 		tfidf = new TfidfVectorizer.Builder()
 				.setMinWordFrequency(5)
 				.setIterator(iter)
 				.setTokenizerFactory(t)
+
 				.setStopWords(stopWords)
 				.build();
-		log.info("Fitting Tfidf model...");
+		logger.info("Fitting Tfidf model...");
 		tfidf.fit();
 
-		log.info("Writing tfidf vectors to text file....");
+		logger.info("Writing tfidf vectors to text file....");
 		SerializationUtils.saveObject(tfidf, new File(tfidfPath));
 	}
 	
 	/**
-	 * 
+	 * load tfidf model
 	 * @param tfidfModel
 	 * @return
 	 */
 	public TfidfVectorizer loadTfidfModel(File tfidfModel) {
+		logger.info("Loading tfidf model...");
 		TfidfVectorizer tfidf = SerializationUtils.readObject(tfidfModel);
+		logger.info("Loading successed!");
 		return tfidf;
 	}
 
+	/**
+	 * Getter of tfidf
+	 * @return TfidfVectorizer
+	 */
 	public TfidfVectorizer getTfidfModel() {
 		return tfidf;
 	}
 
+	/**
+	 * load wordVector model file
+	 * @param wordVetorModelFile input wordVector model file
+	 * @return WordVectors
+	 */
+	public WordVectors loadWordVectors(File wordVetorModelFile) {
+		logger.info("Loading word vector model...");
+		WordVectors vec = null;
+		try {
+			vec = WordVectorSerializer.loadTxtVectors(wordVetorModelFile);
+			logger.info("Loading successed!");
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return vec;
+	}
+	
 	/**
 	 * generate vector for each line of file
 	 * 
@@ -115,12 +139,15 @@ public class TfidfProcess {
 		String tfidfPath = input.subSequence(0, input.lastIndexOf(".")) + ".tfidf";
 		train(tfidfPath);
 		
-		// Creat multi threads to vectorize documents.
+		// initialize wordVectors.
+		vec = loadWordVectors(new File(word2VecModelPath));
+		
+		// Create multi threads to vectorize documents.
 		int cores = Runtime.getRuntime().availableProcessors();
 		TfidfThread[] threads = new TfidfThread[cores];
-		List<List<String>> documents = Util.spiltDocuments(input, cores);
+		List<List<String>> documents = FileUtil.spiltDocuments(input, cores);
 		for (int core = 0; core < cores; core++) {
-			TfidfThread thread = new TfidfThread(core, documents.get(core), tfidf, new File(word2VecModelPath),
+			TfidfThread thread = new TfidfThread(core, documents.get(core), tfidf, vec, stopWords,
 					numOutput);
 			threads[core] = thread;
 			thread.start();
@@ -141,9 +168,9 @@ public class TfidfProcess {
 				System.out.println("Writing into " + output);
 				// write vectors into outputFile
 				BufferedWriter writer = new BufferedWriter(new FileWriter(output));
-				for (INDArray vec : result) {
-					for (int i = 0; i < vec.columns(); i++) {
-						writer.write(Double.toString(vec.getDouble(i)));
+				for (INDArray vector : result) {
+					for (int i = 0; i < vector.columns(); i++) {
+						writer.write(Double.toString(vector.getDouble(i)));
 						writer.write(" ");
 					}
 					writer.newLine();

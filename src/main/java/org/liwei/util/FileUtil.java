@@ -14,7 +14,7 @@ import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Util {
+public class FileUtil {
 	/** 
      * 复制单个文件 
      * @param srcFileName 待复制的文件名 
@@ -136,12 +136,12 @@ public class Util {
         for (int i = 0; i < files.length; i++) {  
             // 复制文件  
             if (files[i].isFile()) {  
-                flag = Util.copyFile(files[i].getAbsolutePath(),  
+                flag = FileUtil.copyFile(files[i].getAbsolutePath(),  
                         destDirName + files[i].getName(), overlay);  
                 if (!flag)  
                     break;  
             } else if (files[i].isDirectory()) {  
-                flag = Util.copyDirectory(files[i].getAbsolutePath(),  
+                flag = FileUtil.copyDirectory(files[i].getAbsolutePath(),  
                         destDirName + files[i].getName(), overlay);  
                 if (!flag)  
                     break;  
@@ -325,14 +325,18 @@ public class Util {
 	 * @param file   given file
 	 * @return  a list of file's all lines
 	 */
-	public static List<String> asList(File file) throws IOException{
+	public static List<String> asList(File file) {
 		List<String> result = new ArrayList<String>();
-		BufferedReader reader = new BufferedReader(new FileReader(file));
-		String line;
-		while ((line = reader.readLine()) != null) {
-			result.add(line);
+		try {
+			BufferedReader reader = new BufferedReader(new FileReader(file));
+			String line;
+			while ((line = reader.readLine()) != null) {
+				result.add(line);
+			}
+			reader.close();
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
-		reader.close();
 		return result;
 	}
 	
@@ -342,25 +346,30 @@ public class Util {
 	 * @param cores  num of documents to split 
 	 * @return a list of list 
 	 */
-	public static List<List<String>> spiltDocuments(String inputPath, int cores) throws IOException {
-		List<String> document = Util.readFileToList(inputPath);
-		int averN = document.size() / cores;
+	public static List<List<String>> spiltDocuments(String inputPath, int cores) {
 		List<List<String>> splitDocument = new ArrayList<List<String>>();
-		for (int i = 0; i < cores; i++) {
-			List<String> texts = new ArrayList<String>();
-			splitDocument.add(texts);
-		}
-		int n = 0;
-		int core = 0;
-		List<String> texts = splitDocument.get(core);
-		for (int i = 0; i < document.size(); i++) {
-			texts.add(document.get(i));
-			n++;
-			if (n > averN && core < cores) {
-				n = 0;
-				core++;
-				texts = splitDocument.get(core);
+		try {
+			List<String> document = FileUtil.readFileToList(inputPath);
+
+			int averN = document.size() / cores;
+			for (int i = 0; i < cores; i++) {
+				List<String> texts = new ArrayList<String>();
+				splitDocument.add(texts);
 			}
+			int n = 0;
+			int core = 0;
+			List<String> texts = splitDocument.get(core);
+			for (int i = 0; i < document.size(); i++) {
+				texts.add(document.get(i));
+				n++;
+				if (n > averN && core < cores) {
+					n = 0;
+					core++;
+					texts = splitDocument.get(core);
+				}
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
 		}
 		return splitDocument;
 	}
