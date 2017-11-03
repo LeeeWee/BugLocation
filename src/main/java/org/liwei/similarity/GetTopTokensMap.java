@@ -19,7 +19,7 @@ public class GetTopTokensMap {
 	 * @param top input top tokens size 
 	 * @return map of all bug report top tokens
 	 */
-	public HashMap<String, HashMap<String, TokenScore>> getBugReportTopTokens(HashMap<String, BugReport> brRepo,
+	public static HashMap<String, HashMap<String, TokenScore>> getBugReportTopTokens(HashMap<String, BugReport> brRepo,
 			SortTokens brSort, ScoreType type, int top) {
 		HashMap<String, HashMap<String, TokenScore>> brTopTokensMap = new HashMap<String, HashMap<String, TokenScore>>();
 		for (Entry<String, BugReport> entry : brRepo.entrySet()) {
@@ -37,7 +37,7 @@ public class GetTopTokensMap {
 	 * @param top input top tokens size 
 	 * @return map of all code file top tokens
 	 */
-	public HashMap<String, HashMap<String, TokenScore>> getCodeFileTopTokens(HashMap<String, CodeMetrics> codeMetricsSet,
+	public static HashMap<String, HashMap<String, TokenScore>> getCodeFileTopTokens(HashMap<String, CodeMetrics> codeMetricsSet,
 			SortTokens codeSort, ScoreType type, int top) {
 		HashMap<String, HashMap<String, TokenScore>> codeTopTokensMap = new HashMap<String, HashMap<String, TokenScore>>();
 		for (Entry<String, CodeMetrics> entry : codeMetricsSet.entrySet()) {
@@ -52,7 +52,7 @@ public class GetTopTokensMap {
 	 * @param tokenScoreList input tokenScore list
 	 * @return map of tokenScore
 	 */
-	private HashMap<String, TokenScore> tokenScoreListToHashMap(List<TokenScore> tokenScoreList) {
+	private static HashMap<String, TokenScore> tokenScoreListToHashMap(List<TokenScore> tokenScoreList) {
 		HashMap<String, TokenScore> map = new HashMap<String, TokenScore>();
 		for (TokenScore tokenScore : tokenScoreList) {
 			map.put(tokenScore.token, tokenScore);

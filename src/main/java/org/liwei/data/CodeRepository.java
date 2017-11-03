@@ -7,9 +7,18 @@ import java.io.InputStreamReader;
 import java.util.HashMap;
 
 import org.liwei.util.Index;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class CodeRepository {
 
+	private static Logger logger = LoggerFactory.getLogger(CodeRepository.class);
+	
+	private static final String GOOD_INDEX_PATH = "good.i";
+	private static final String GOOD_TEXT_PATH = "good.s";
+	private static final String GOOD_VECTOR_PATH = "good.v";
+	private static final String FILE_HISTORY_PATH = "file.history";
+	
 	/**
 	 * Map each source file(path) to a metric in vector format.
 	 */
@@ -81,4 +90,23 @@ public class CodeRepository {
 	public HashMap<String, CodeMetrics> getCodeMetricsSet() {
 		return codeMetricsSet;
 	}
+	
+	/**
+	 * read code report repository in the given directory
+	 * @param directory the directory contains good code index, vector, text file and history file.
+	 * @return codeRepository
+	 */
+	public static CodeRepository readCodeRepository(String directory) {
+		logger.info("Reading code repository...");
+		if (!directory.endsWith("\\"))
+			directory += "\\";
+		File indexFile = new File(directory + GOOD_INDEX_PATH); 
+		File vectorFile = new File(directory + GOOD_VECTOR_PATH);
+		File textFile = new File(directory + GOOD_TEXT_PATH);
+		File historyFile = new File(directory + FILE_HISTORY_PATH);
+		CodeRepository codeRepository = new CodeRepository(indexFile, vectorFile, textFile, historyFile);
+		logger.info("Reading successed!");
+		return codeRepository;
+	}
+	
 }

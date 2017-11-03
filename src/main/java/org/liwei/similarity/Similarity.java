@@ -15,8 +15,6 @@ public class Similarity {
 	protected WordVectors vec;
 	protected SortTokens brSort;
 	protected SortTokens codeSort;
-	protected TfidfVectorizer brTfidf;
-	protected TfidfVectorizer codeTfidf;
 	protected HashMap<String, HashMap<String, TokenScore>> brTopTokensMap;
 	protected HashMap<String, HashMap<String, TokenScore>> codeTopTokensMap;
 	
@@ -229,8 +227,6 @@ public class Similarity {
 		protected WordVectors vec;
 		protected SortTokens brSort;
 		protected SortTokens codeSort;
-		protected TfidfVectorizer brTfidf;
-		protected TfidfVectorizer codeTfidf;
 		protected HashMap<String, HashMap<String, TokenScore>> brTopTokensMap;
 		protected HashMap<String, HashMap<String, TokenScore>> codeTopTokensMap;
 
@@ -252,15 +248,6 @@ public class Similarity {
 			return this;
 		}
 
-		public Builder setBrTfidf(TfidfVectorizer brTfidf) {
-			this.brTfidf = brTfidf;
-			return this;
-		}
-
-		public Builder setCodeTfidf(TfidfVectorizer codeTfidf) {
-			this.codeTfidf = codeTfidf;
-			return this;
-		}
 
 		public Builder setBrTopTokensMap(HashMap<String, HashMap<String, TokenScore>> brTopTokensMap) {
 			this.brTopTokensMap = brTopTokensMap;
@@ -270,6 +257,17 @@ public class Similarity {
 		public Builder setCodeTopTokensMap(HashMap<String, HashMap<String, TokenScore>> codeTopTokensMap) {
 			this.codeTopTokensMap = codeTopTokensMap;
 			return this;
+		}
+		
+		public Similarity build() {
+			Similarity sim = new Similarity();
+			sim.vec = this.vec;
+			sim.brSort = this.brSort;
+			sim.codeSort = this.codeSort;
+			sim.brTopTokensMap = this.brTopTokensMap;
+			sim.codeTopTokensMap = this.codeTopTokensMap;
+			
+			return sim;
 		}
 
 	}

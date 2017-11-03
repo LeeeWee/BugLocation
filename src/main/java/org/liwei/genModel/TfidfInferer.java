@@ -164,7 +164,7 @@ public class TfidfInferer {
 			heap.add(score);
 		}
 		int left = topN;
-		while (left >= 0 && heap != null) {
+		while (left >= 0 && (!heap.isEmpty())) {
 			TfidfScore score = heap.poll();
 			topWords.add(score.word);
 			left--;

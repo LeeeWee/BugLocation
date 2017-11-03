@@ -4,7 +4,7 @@ import java.util.Comparator;
 
 public class SimilarBugReport extends BugReport{
 	
-	protected Double similarity;
+	public Double similarity;
 	
 	public SimilarBugReport(BugReport bugReport, Double similarity) {
 		super(bugReport.getId(), bugReport.getVector(), bugReport.getModifiedFiles());
@@ -12,7 +12,7 @@ public class SimilarBugReport extends BugReport{
 		this.SetText(bugReport.getText());
 	}
 	
-	static class SimilarityComparator implements Comparator<SimilarBugReport> {
+	public static class SimilarityComparator implements Comparator<SimilarBugReport> {
 
 		public int compare(SimilarBugReport br1, SimilarBugReport br2) {
 			if (br1.similarity < br2.similarity) 

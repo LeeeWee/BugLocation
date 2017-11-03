@@ -35,6 +35,7 @@ public class TextCleaning {
 				System.out.println("Text cleaning processing:" + i + "/" + commentFiles.size());
 			}
 		}
+		System.out.println("Finished text cleaning!");
 		try {
 			FileUtil.writeStringToFile(allComments, destPath);
 			FileUtil.writeStringToFile(infos, destPath.substring(0, destPath.lastIndexOf(".")) + ".i");

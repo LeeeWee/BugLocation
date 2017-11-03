@@ -8,8 +8,19 @@ import java.util.HashMap;
 
 import org.liwei.util.Index;
 import org.liwei.util.VectorFile;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class BugReportRepository {
+	
+	private static Logger logger = LoggerFactory.getLogger(BugReportRepository.class);
+	
+	private static final String BUG_REPORT_INDEX_PATH = "bug_report.i";
+	private static final String BUG_REPORT_TEXT_PATH = "bug_report.s";
+	private static final String BUG_REPORT_VECTOR_PATH = "bug_report.v";
+	private static final String BAD_INDEX_PATH = "bad.i";
+	private static final String BAD_VECTOR_PATH = "bad.v";
+	
 	/**
 	 * all bug reports in bug repository
 	 */
@@ -115,16 +126,18 @@ public class BugReportRepository {
 	 * @return
 	 */
 	public static BugReportRepository readBugReportRepository(String directory) {
+		logger.info("Reading bug report repository...");
 		if (!directory.endsWith("\\"))
 			directory += "\\";
-		File indexFile = new File(directory + "bug_report.i"); 
-		File vectorFile = new File(directory + "bug_report.v");
-		File textFile = new File(directory + "bug_report.s");
-		File badIndexFile = new File(directory + "bad.i");
-		File badVectorFile = new File(directory + "bad.v");
+		File indexFile = new File(directory + BUG_REPORT_INDEX_PATH); 
+		File vectorFile = new File(directory + BUG_REPORT_VECTOR_PATH);
+		File textFile = new File(directory + BUG_REPORT_TEXT_PATH);
+		File badIndexFile = new File(directory + BAD_INDEX_PATH);
+		File badVectorFile = new File(directory + BAD_VECTOR_PATH);
 		HashMap<Integer, Index> badIndices = Index.readIndices(badIndexFile, badVectorFile);
 		BugReportRepository repository = new BugReportRepository(indexFile, vectorFile, textFile);
 		repository.attachModifiedFiles(badIndices);
+		logger.info("Reading successed!");
 		return repository;
 	}
 	
