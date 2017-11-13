@@ -58,5 +58,9 @@ public class BugReport {
 		return this.text;
 	}
 	
+	public boolean isModified(String file) {
+		
+	}
+	
 	
 }

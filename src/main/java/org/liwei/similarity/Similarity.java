@@ -4,7 +4,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map.Entry;
 
-import org.deeplearning4j.bagofwords.vectorizer.TfidfVectorizer;
 import org.deeplearning4j.models.embeddings.wordvectors.WordVectors;
 import org.liwei.data.BugReport;
 import org.liwei.data.CodeMetrics;

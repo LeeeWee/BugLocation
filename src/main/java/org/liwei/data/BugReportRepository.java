@@ -89,7 +89,7 @@ public class BugReportRepository {
 	}
 
 	/**
-	 * attach modified files information to dts records
+	 * attach modified files information to bug reports
 	 * 
 	 * @param badIndices
 	 *            A set of modified files

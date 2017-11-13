@@ -6,6 +6,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
@@ -18,6 +19,9 @@ import java.util.List;
 import org.liwei.data.BugReport;
 import org.liwei.data.BugReportRepository;
 import org.liwei.data.CodeRepository;
+import org.liwei.data.SimilarBugReport;
+import org.liwei.similarity.GetSimilarBugReport;
+import org.liwei.similarity.Similarity;
 import org.nd4j.linalg.api.ndarray.INDArray;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -62,6 +66,8 @@ public class SimilarityMatrixGenerator {
 		}
 	}
 	
+	public static final int TOP_SIMILAR_DTS = 100;
+	public static final int TOP_FILES_FROM_VOTES = 10000;
 	
 	public static final int TOP_SIMILAR_CODE = 300;
 	
@@ -110,15 +116,25 @@ public class SimilarityMatrixGenerator {
 	private HashMap<String, Double> votedScore;
 	
 	/**
+	 * Used to calculate similarity between dts and dts or dts and code file.
+	 */
+	private Similarity sim;
+	
+	private GetSimilarBugReport getSimilarBugReport;
+	
+	/**
 	 * Constructor
 	 * @param brRepository The given bug report repository.
 	 * @param codeRepository The given code souce files repository.
 	 */
-	public SimilarityMatrixGenerator(BugReportRepository brRepository, CodeRepository codeRepository) {
+	public SimilarityMatrixGenerator(BugReportRepository brRepository, CodeRepository codeRepository, Similarity sim) {
 		this.brRepository = brRepository;
 		this.codeRepository = codeRepository;
 		if ((codeRepository != null) && (brRepository != null)) 
 			codeRepository.attachRelatedDTS(brRepository);
+		this.sim = sim;
+		
+		this.getSimilarBugReport = new GetSimilarBugReport(sim, brRepository);
 		this.maxGoodBadRate = MAX_GOOD_BAD_RATE;
 		minVote = Double.MAX_VALUE;
 		maxVote = Double.MIN_VALUE;
@@ -126,6 +142,18 @@ public class SimilarityMatrixGenerator {
 		maxFrequency = Double.MIN_VALUE;
 		minRecency = Double.MAX_VALUE;
 		maxRecency = Double.MIN_VALUE;
+	}
+	
+	/**
+	 * set sim to calculate similarity
+	 * @param sim input instance of Similarity
+	 */
+	public void setSim(Similarity sim) {
+		this.sim = sim;
+	}
+	
+	public void setMaxGoodBadRate(double maxGoodBadRate) {
+		this.maxGoodBadRate = maxGoodBadRate;
 	}
 	
 	public void saveParameters(File file) {
@@ -186,9 +214,6 @@ public class SimilarityMatrixGenerator {
 		maxRecency = Double.max(maxRecency, g.maxRecency);
 	}
 	
-	public void setMaxGoodBadRate(double maxGoodBadRate) {
-		this.maxGoodBadRate = maxGoodBadRate;
-	}
 	
 	/**
 	 * Given a set of bug reports, generate the traning set.
@@ -206,8 +231,52 @@ public class SimilarityMatrixGenerator {
 				logger.info(count + " bug reports handled.");
 			if (br.getModifiedFiles().size() == 0)
 				continue;
+			HashMap<String, INDArray> generated = generate(br);
+			result.addAll(generated.values());
+		}
+		// Normalize and write to the file.
+		logger.info("Normalizing vectors...");
+		normalize(result);
+		logger.info("Writing vectors...");
+		for (INDArray vector : result) {
+			// write the array
+			if (vector.data().getDouble(0) < 0.999999)
+				writer.write("0");
+			else 
+				writer.write("1");
+			for (int i = 1; i < vector.columns(); i++) {
+				writer.write(",");
+				writer.write(Double.toString(vector.data().getDouble(i)));
+			}
+			writer.newLine();
+		}
+		writer.close();
+	}
+	
+	//TODO
+	public HashMap<String, INDArray> generate(BugReport br) {
+		// ignore bug report with no related modified files
+		if (br.getModifiedFiles().size() == 0) 
+			return new HashMap<String, INDArray>();
+		
+		List<SimilarBugReport> similarBrs = getSimilarBugReport.getSimilarBugReport(br, TOP_SIMILAR_DTS);
+		
+		// vote for candidate files.
+		HashMap<String, Double> voteScores = new HashMap<String, Double>();
+		for (SimilarBugReport similarBr : similarBrs) {
 			
 		}
+		
+		// pick up topN candidate files.
+//		PriorityQueue<SimilarResult> 
+	}
+	
+	
+	
+	public List<FileResult> generateRankingMatrix(BugReport br, Integer qid, boolean isTraining) {
+		List<FileResult> finals = new LinkedList<FileResult>();
+		
+		return finals;
 	}
 	
 	/**
@@ -226,22 +295,20 @@ public class SimilarityMatrixGenerator {
 	 * @param result The vector to write.
 	 */
 	public static void writeRankingFeatures(BufferedWriter writer, Integer rank, FileResult result) {
-		
-	}
-	
-	/**
-	 * Normalize an array of features.
-	 * @param features The feature array to normalize.
-	 */
-	public void normalize(double[] features) {
-		
-	}
-	
-	public void normalize(Collection<INDArray> set) {
-		for (INDArray vector : set) {
-			
+		try {
+			writer.write(rank.toString() + " qid:" + result.qid.toString());
+			for (Integer column = 1; column <= result.features.length; column++) {
+				writer.write(" " + column.toString() + ":" + result.features[column - 1]);
+				writer.write("\n");
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
 		}
 	}
+	
+
+	
+
 	
 	public static String vector2String(INDArray vector) {
 		StringBuilder result = new StringBuilder();
@@ -255,6 +322,27 @@ public class SimilarityMatrixGenerator {
 		}
 		result.append("\n");
 		return result.toString();
+	}
+	
+	public void normalize(Collection<INDArray> set) {
+		for (INDArray vector : set) {
+			double value = maxMinNormalize(maxVote, minVote, vector.data().getDouble(1));
+			vector.data().put(1, value);
+			value = maxMinNormalize(maxFrequency, minFrequency, vector.data().getDouble(3));
+			vector.data().put(3, value);
+			value = maxMinNormalize(maxRecency, minRecency, vector.data().getDouble(4));
+			vector.data().put(4, value);
+		}
+	}
+	
+	/**
+	 * Normalize an array of features.
+	 * @param features The feature array to normalize.
+	 */
+	public void normalize(double[] features) {
+		features[0] = this.maxMinNormalize(maxVote, minVote, features[0]);
+		features[2] = this.maxMinNormalize(maxFrequency, minFrequency, features[2]);
+		features[3] = this.maxMinNormalize(maxRecency, minRecency, features[3]);
 	}
 	
 	/**
