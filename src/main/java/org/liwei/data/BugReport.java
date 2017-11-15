@@ -1,5 +1,6 @@
 package org.liwei.data;
 
+import java.util.Date;
 import java.util.Set;
 
 import  org.liwei.util.Index;
@@ -27,13 +28,20 @@ public class BugReport {
 	 */
 	protected Set<Index> modifiedFiles;
 	
-	public BugReport(String bugId, INDArray vector) {
+	/**
+	 * date of commit time
+	 */
+	protected Date commitDate;
+	
+	public BugReport(String bugId, Date commitDate, INDArray vector) {
 		this.bugId = bugId;
+		this.commitDate = commitDate;
 		this.vector = vector;
 	}
 	
-	public BugReport(String bugId, INDArray vector, Set<Index> modifiedFiles) {
+	public BugReport(String bugId, Date commitDate, INDArray vector, Set<Index> modifiedFiles) {
 		this.bugId = bugId;
+		this.commitDate = commitDate;
 		this.vector = vector;
 		this.modifiedFiles = modifiedFiles;
 	}
@@ -44,6 +52,10 @@ public class BugReport {
 	
 	public INDArray getVector() {
 		return this.vector;
+	}
+	
+	public Date getCommitDate() {
+		return this.commitDate;
 	}
 	
 	public Set<Index> getModifiedFiles() {
@@ -59,7 +71,11 @@ public class BugReport {
 	}
 	
 	public boolean isModified(String file) {
-		
+		for (Index index : modifiedFiles) {
+			if (index.getPath().equals(file))
+				return true;
+		}
+		return false;
 	}
 	
 	

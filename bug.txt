@@ -1,0 +1,4 @@
+Bug 1: Index file can't split simply by char " ", some code file paths contains " "
+ Alternative soulution : split with regular expression 
+
+Bug 2£ºBug report id in bad index file's related to the commit id, need to be corrected.

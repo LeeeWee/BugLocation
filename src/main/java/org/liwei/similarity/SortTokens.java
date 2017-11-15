@@ -18,15 +18,12 @@ import org.liwei.util.DataTypeUtil.TokenScore;
 import org.liwei.util.DataTypeUtil.TokenScoreComparator;
 import org.liwei.util.FileUtil;
 import org.liwei.util.StopWordsPreprocessor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Sort tokens of text by tokens score. 
  * @author Liwei
  */
 public class SortTokens {
-	private static Logger logger = LoggerFactory.getLogger(SortTokens.class);
 	
 	private TfidfVectorizer tfidf;
 	private List<String> stopWords;

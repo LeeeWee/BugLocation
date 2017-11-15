@@ -29,6 +29,7 @@ public class SplitFilesTest {
 				if (!line.startsWith("org.eclipse."))
 					errorFiles.add(line);
 			}
+			reader.close();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

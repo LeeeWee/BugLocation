@@ -141,7 +141,7 @@ public class BugInfo {
 			BufferedWriter writer = new BufferedWriter(new FileWriter(IndexPath));
 			int lineNumber = 0;
 			for (BugInfo bugInfo : bugInfoList) {
-				writer.write(lineNumber + " " + bugInfo.bugId + "\n");
+				writer.write(lineNumber + " " + bugInfo.bugId + " 0000 " + bugInfo.commitDate.getTime() + "\n");
 				String summary = bugInfo.summary.replaceAll("^Bug \\d+ ", "");
 				summ_Desc = summ_Desc + summary + " " + bugInfo.description + "\n";
 				lineNumber++;

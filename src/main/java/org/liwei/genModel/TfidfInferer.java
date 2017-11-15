@@ -24,7 +24,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class TfidfInferer {
-	private static Logger log = LoggerFactory.getLogger(TfidfInferer.class);
 	/**
 	 * default value:top n largest tfidf words 
 	 */

@@ -3,6 +3,7 @@ package org.liwei.util;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map.Entry;
 
@@ -16,6 +17,8 @@ public class Index {
 	
 	private String path;
 	
+	private Date date;
+	
 	private INDArray vector;
 	
 	private String text;
@@ -27,6 +30,10 @@ public class Index {
 		int length = values.length;
 		if (length > 2)
 			this.path = values[2];
+		if (length > 3) {
+			Long time = new Long(values[3]);
+			date = new Date(time);
+		}
 	}
 	
 	public String getBugId() {
@@ -35,6 +42,10 @@ public class Index {
 	
 	public String getPath() {
 		return path;
+	}
+	
+	public Date getDate() {
+		return date;
 	}
 	
 	public void setVector(INDArray vector) {

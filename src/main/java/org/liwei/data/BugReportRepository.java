@@ -41,7 +41,7 @@ public class BugReportRepository {
 		for (Integer i = 0; i < vectors.size(); i++) {
 			if (indices.containsKey(i)) {
 				Index index = indices.get(i);
-				BugReport bugReport = new BugReport(index.getBugId(), vectors.get(i));
+				BugReport bugReport = new BugReport(index.getBugId(), index.getDate(), vectors.get(i));
 				bugReports.put(index.getBugId(), bugReport);
 			}
 		}
@@ -64,7 +64,7 @@ public class BugReportRepository {
 		for (Integer i = 0; i < vectors.size(); i++) {
 			if (indices.containsKey(i)) {
 				Index index = indices.get(i);
-				BugReport bugReport = new BugReport(index.getBugId(), vectors.get(i));
+				BugReport bugReport = new BugReport(index.getBugId(), index.getDate(), vectors.get(i));
 				bugReports.put(index.getBugId(), bugReport);
 			}
 		}

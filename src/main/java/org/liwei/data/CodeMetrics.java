@@ -90,7 +90,7 @@ public class CodeMetrics {
 	 * @param time Input time.
 	 * @return The index of the latest time of given time.
 	 */
-	public int locateChangeHistory(long time) {
+	public int locateChangePoint(long time) {
 		if (changeHistory[0] > time) 
 			return -1;
 		int i = 0;

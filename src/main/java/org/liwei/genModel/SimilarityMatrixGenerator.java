@@ -4,25 +4,32 @@ import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
-import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map.Entry;
+import java.util.PriorityQueue;
+import java.util.Set;
 
 import org.liwei.data.BugReport;
 import org.liwei.data.BugReportRepository;
+import org.liwei.data.CodeMetrics;
 import org.liwei.data.CodeRepository;
 import org.liwei.data.SimilarBugReport;
 import org.liwei.similarity.GetSimilarBugReport;
 import org.liwei.similarity.Similarity;
+import org.liwei.util.DataTypeUtil.FileScore;
+import org.liwei.util.DataTypeUtil.FileScoreComparator;
+import org.liwei.util.Index;
 import org.nd4j.linalg.api.ndarray.INDArray;
+import org.nd4j.linalg.factory.Nd4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -113,7 +120,7 @@ public class SimilarityMatrixGenerator {
 	private double minRecency;
 	private double maxRecency;
 
-	private HashMap<String, Double> votedScore;
+	private HashMap<String, Double> votedScores;
 	
 	/**
 	 * Used to calculate similarity between dts and dts or dts and code file.
@@ -264,17 +271,206 @@ public class SimilarityMatrixGenerator {
 		// vote for candidate files.
 		HashMap<String, Double> voteScores = new HashMap<String, Double>();
 		for (SimilarBugReport similarBr : similarBrs) {
-			
+			if (br.getId().equals(similarBr.getId()))
+				continue;
+			updateFileScores(voteScores, similarBr.getModifiedFiles(), similarBr.similarity);
 		}
+		if (voteScores.isEmpty())
+			return new HashMap<String, INDArray>();
 		
 		// pick up topN candidate files.
-//		PriorityQueue<SimilarResult> 
+		PriorityQueue<FileScore> heap = new PriorityQueue<FileScore>(voteScores.size(), new FileScoreComparator());
+		for (Entry<String, Double> score : voteScores.entrySet()) 
+			heap.add(new FileScore(score.getKey(), score.getValue()));
+		List<FileScore> candidates = new ArrayList<FileScore>();
+		int goodCount = (int)Math.round(br.getModifiedFiles().size() * maxGoodBadRate + 0.5);
+		while (!heap.isEmpty()) {
+			FileScore score = heap.poll();
+			if (br.isModified(score.file))
+				candidates.add(score);
+			else {
+				if (goodCount > 0) {
+					candidates.add(score);
+					goodCount--;
+				}
+			}
+		}
+		
+		return generateVectors(br, candidates);
 	}
 	
+	/**
+	 * Generate the training vectors, given a set of candidate source files.
+	 * @param br the related bug report 
+	 * @param candidates a list of candidate source files
+	 * @return a list of generated vectors
+	 */
+	private HashMap<String, INDArray> generateVectors(BugReport br, List<FileScore> candidates) {
+		HashMap<String, INDArray> result = new HashMap<String, INDArray>();
+		
+		for (FileScore fileScore : candidates) {
+			String path = fileScore.file;
+			// Verfications.
+			CodeMetrics codeMetrics = codeRepository.getCodeMetrics(path);
+			if (codeMetrics == null) 
+				continue;
+			// get features
+			double votedScore = fileScore.score;
+			long brTime = br.getCommitDate().getTime();
+			double frequency = 0.0;
+			double recency = 1.0 / (1.0 + 15.0 * 12.0); // 15 years ago by default
+			int index = codeMetrics.locateChangePoint(brTime);
+			if (index > 0) {
+				frequency = (double)codeMetrics.countChangeFrequency(index);
+				long lastModifiedTime = codeMetrics.getChangePoint(index);
+				double monthDurationTime = ((double)(brTime - lastModifiedTime)) / 1000.0 / 3600.0 / 24.0 / 30.0;
+				recency = 1.0 / (1.0 + monthDurationTime);
+			}
+			
+			// Update max-min to prepare normalization.
+			if (votedScore > maxVote) 
+				maxVote = votedScore;
+			if (votedScore < minVote)
+				minVote = votedScore;
+			if (frequency > maxFrequency) 
+				maxFrequency = frequency;
+			if (frequency < minFrequency)
+				minFrequency = frequency;
+			if (recency > maxRecency)
+				maxRecency = recency;
+			if (recency < minRecency)
+				minRecency = recency;
+			
+			// Merge vectors
+			Double fileSimilarity = sim.similarityBySameWords(br, codeMetrics);
+			double label;
+			if (br.isModified(path))
+				label = 1.0;
+			else 
+				label = 0.0;
+			
+			double[] values = new double[] {label, votedScore, fileSimilarity, frequency, recency};
+			result.put(path, Nd4j.create(values));
+		}
+		
+		return result;
+	}
 	
+	/**
+	 * Pre-calculate some features(e.g.voted scores)
+	 * This method must be invoked before feature generated for each bug report.
+	 * For each bug report, it calculates the voted scores and stores them in.
+	 * 'votedScores'
+	 * @param br The bugReport to preprocess
+	 */
+	public void prepareGenerationForBugReport(BugReport br) {
+		votedScores = new HashMap<String, Double>();
+		for (BugReport r : brRepository.getBugReports().values()) {
+			if (r.getId().equals(br.getId())) // Exclude self
+				continue;
+			
+			Double similarity = sim.similarityBySameWords(br, r);
+			for (Index index : r.getModifiedFiles()) {
+				String path = index.getPath();
+				if (!votedScores.containsKey(path))
+					votedScores.put(path, 0.0);
+				else 
+					votedScores.put(path, votedScores.get(path) + similarity);
+			}
+		}
+	}
+	
+	/**
+	 * Generate an unnormalized vectors of scores for (br, code).
+	 * @param br The given bug report.
+	 * @param code The given code metrics
+	 * @return the generate vectors
+	 */
+	public double[] generate(BugReport br, CodeMetrics code) {
+		return generate(br, code, false);
+	}
+	
+	/**
+	 * Given a bug report and a source file, generate a vector of scores
+	 * 		The result may be normalize. determined by the parameter "normalize"
+	 * @param br The given bug report.
+	 * @param code The given code metrics.
+	 * @param normalize Whether to normalize the generated vector
+	 * @return The generate vectors.
+	 */
+	public double[] generate(BugReport br, CodeMetrics codeMetrics, boolean normalize) {
+		// Calculate voted score.
+		double votedScore = 0.0;
+		if (votedScores.containsKey(codeMetrics.getPath()))
+			votedScore = votedScores.get(codeMetrics.getPath());
+		
+		// Calculate file similarity
+		double fileSimilarity = sim.similarityBySameWords(br, codeMetrics);
+		
+		// Calculate extra features.
+		long brTime = br.getCommitDate().getTime();
+		double frequency = 0.0;
+		double recency = 1.0 / (1.0 + 15.0 * 12.0); // 15 years ago by default
+		int index = codeMetrics.locateChangePoint(brTime);
+		if (index > 0) {
+			frequency = (double)codeMetrics.countChangeFrequency(index);
+			long lastModifiedTime = codeMetrics.getChangePoint(index);
+			double monthDurationTime = ((double)(brTime - lastModifiedTime)) / 1000.0 / 3600.0 / 24.0 / 30.0;
+			recency = 1.0 / (1.0 + monthDurationTime);
+		}
+		
+		// Update max-min to prepare normalization.
+		if (votedScore > maxVote) 
+			maxVote = votedScore;
+		if (votedScore < minVote)
+			minVote = votedScore;
+		if (frequency > maxFrequency) 
+			maxFrequency = frequency;
+		if (frequency < minFrequency)
+			minFrequency = frequency;
+		if (recency > maxRecency)
+			maxRecency = recency;
+		if (recency < minRecency)
+			minRecency = recency;
+		
+		double[] features = new double[] {votedScore, fileSimilarity, frequency, recency};
+		if (normalize)
+			normalize(features);
+		return features;
+	}
 	
 	public List<FileResult> generateRankingMatrix(BugReport br, Integer qid, boolean isTraining) {
 		List<FileResult> finals = new LinkedList<FileResult>();
+		
+		// Do some preprocessing to avoid redundant calculation.
+		prepareGenerationForBugReport(br);
+		
+		// Enum code files.
+		List<FileResult> vectors = new ArrayList<FileResult>();
+		for (CodeMetrics codeMetrics : codeRepository.getCodeMetricsSet().values()) {
+			double[] v = generate(br, codeMetrics, !isTraining);
+			if (v == null)
+				continue;
+			boolean isModified;
+			if (isTraining) {
+				if (br.isModified(codeMetrics.getPath()))
+					isModified = true;
+				else 
+					isModified = false;
+				vectors.add(new FileResult(codeMetrics.getPath(), isModified, v));
+			}
+			
+			// Sort and add to the final results.
+			vectors.sort(new FileComparator());
+			Integer count = 0;
+			for (FileResult result : vectors) {
+				result.qid = qid;
+				finals.add(result);
+				count++;
+				if (count >= TOP_SIMILAR_CODE)
+					break;
+			}
+		}
 		
 		return finals;
 	}
@@ -285,7 +481,39 @@ public class SimilarityMatrixGenerator {
 	 * @param isTraining
 	 */
 	public void generateRankingMatrix(File outputFile, boolean isTraining) {
+		List<FileResult> finals = new LinkedList<FileResult>();
 		
+		// Iterate bug report.
+		Integer qid = 1;
+		for (BugReport br : brRepository.getBugReports().values()) {
+			if ((qid % 100) == 0)
+				logger.info(qid.toString() + " records handled.");
+			qid++;
+			if (br.getModifiedFiles().size() == 0)
+				continue;
+			
+			// Enumerate code files.
+			List<FileResult> vectors = generateRankingMatrix(br, qid, isTraining);
+			finals.addAll(vectors);
+		}
+		
+		// Normalize and output.
+		try {
+			BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(outputFile)));
+			for (FileResult result : finals) {
+				normalize(result.features);
+				
+				Integer rank;
+				if (result.isModified)
+					rank = TOP_SIMILAR_CODE;
+				else 
+					rank = 1;
+				writeRankingFeatures(writer, rank, result);
+			}
+			writer.close();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
 	
 	/**
@@ -306,8 +534,23 @@ public class SimilarityMatrixGenerator {
 		}
 	}
 	
-
-	
+	/**
+	 * when a similar bug report comes, update the votes.
+	 * @param fileScores the voted scores to update
+	 * @param files the list of modified files related the bug report
+	 * @param similarity similarity of the bug report
+	 */
+	private void updateFileScores(HashMap<String, Double> fileScores, Set<Index> files, Double similarity) {
+		if (files.isEmpty())
+			return;
+		
+		for (Index index : files) {
+			String path = index.getPath();
+			if (!fileScores.containsKey(path))
+				fileScores.put(path, 0.0);
+			fileScores.put(path, fileScores.get(path) + similarity);
+		}
+	}
 
 	
 	public static String vector2String(INDArray vector) {

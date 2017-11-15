@@ -81,6 +81,8 @@ public class CodeRepository {
 	 * @return Code metrics to input path.
 	 */
 	public CodeMetrics getCodeMetrics(String path) {
+		if (!codeMetricsSet.containsKey(path))
+			return null;
 		return codeMetricsSet.get(path);
 	}
 	

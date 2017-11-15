@@ -7,7 +7,7 @@ public class SimilarBugReport extends BugReport{
 	public Double similarity;
 	
 	public SimilarBugReport(BugReport bugReport, Double similarity) {
-		super(bugReport.getId(), bugReport.getVector(), bugReport.getModifiedFiles());
+		super(bugReport.getId(), bugReport.getCommitDate(), bugReport.getVector(), bugReport.getModifiedFiles());
 		this.similarity = similarity;
 		this.SetText(bugReport.getText());
 	}

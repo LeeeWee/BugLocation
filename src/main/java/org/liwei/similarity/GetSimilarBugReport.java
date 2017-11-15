@@ -13,11 +13,8 @@ import org.liwei.data.SimilarBugReport;
 import org.liwei.data.SimilarBugReport.SimilarityComparator;
 import org.liwei.similarity.SortTokens.ScoreType;
 import org.liwei.util.DataTypeUtil.TokenScore;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class GetSimilarBugReport {
-	private static Logger logger = LoggerFactory.getLogger(GetSimilarBugReport.class);
 
 	private Similarity sim;
 	private BugReportRepository brRepo;
