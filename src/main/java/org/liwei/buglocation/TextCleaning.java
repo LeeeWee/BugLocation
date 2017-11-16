@@ -13,9 +13,9 @@ public class TextCleaning {
 	private static List<String> stopWords = new ArrayList<String>();
 
 	public static void main(String[] args) {
-		String dirPath = "D:\\Data\\working\\good\\";
-		String destPath = "D:\\Data\\working\\good.txt";
-		cleanGoodFiles(dirPath, destPath);
+		String dirPath = "D:\\Data\\working\\bad\\";
+		String destPath = "D:\\Data\\working\\bad.txt";
+		cleanBadFiles(dirPath, destPath);
 	}
 	
 	public static void cleanBadFiles(String dirPath, String destPath) {

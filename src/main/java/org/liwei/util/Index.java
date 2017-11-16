@@ -6,6 +6,8 @@ import java.io.FileReader;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map.Entry;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.nd4j.linalg.api.ndarray.INDArray;
 
@@ -24,16 +26,32 @@ public class Index {
 	private String text;
 	
 	public Index(String line) {
-		String[] values = line.split(" ");
-		this.indexNumber = Integer.parseInt(values[0]);
-		this.bugId = values[1];
-		int length = values.length;
-		if (length > 2)
-			this.path = values[2];
-		if (length > 3) {
-			Long time = new Long(values[3]);
-			date = new Date(time);
+		String pattern = "(\\d*)\\s(\\S*)(\\s*)(eclipse.*\\.java|0*)(\\s*)(\\d*)";
+		// create regular pattern
+		Pattern r = Pattern.compile(pattern);
+		
+		// create instance of Matcher
+		Matcher m = r.matcher(line);
+		
+		if (m.find()) {
+			this.indexNumber = Integer.parseInt(m.group(1));
+			this.bugId = m.group(2);
+			if (m.group(4).length() != 0) 
+				this.path = m.group(4);
+			if (m.group(6).length() != 0)
+				this.date = new Date(new Long(m.group(6)));
 		}
+		
+//		String[] values = line.split(" ");
+//		this.indexNumber = Integer.parseInt(values[0]);
+//		this.bugId = values[1];
+//		int length = values.length;
+//		if (length > 2)
+//			this.path = values[2];
+//		if (length > 3) {
+//			Long time = new Long(values[3]);
+//			date = new Date(time);
+//		}
 	}
 	
 	public String getBugId() {

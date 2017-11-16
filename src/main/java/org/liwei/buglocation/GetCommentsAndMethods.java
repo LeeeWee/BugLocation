@@ -7,7 +7,7 @@ import org.liwei.util.FileUtil;;
 
 public class GetCommentsAndMethods {
 	public static void main(String[] args) {
-		String dirPath = "D:\\Data\\working\\good";
+		String dirPath = "D:\\Data\\working\\bad";
 		List<String> files = FileUtil.getAllFiles(dirPath, ".java");
 		int fileCount = files.size();
 		for (int i = 0; i < fileCount; i++) {

@@ -28,12 +28,10 @@ public class FileUtil {
         // 判断源文件是否存在  
         if (!srcFile.exists()) {  
         	message = "源文件：" + srcFileName + "不存在！";  
-            //JOptionPane.showMessageDialog(null, MESSAGE);  
         	//System.out.print(message);
             return false;  
         } else if (!srcFile.isFile()) {  
         	message = "复制文件失败，源文件：" + srcFileName + "不是一个文件！";  
-            //JOptionPane.showMessageDialog(null, MESSAGE);  
         	System.out.print(message);
             return false;  
         }  
