@@ -1,5 +1,6 @@
 package org.liwei.data;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.nd4j.linalg.api.ndarray.INDArray;
@@ -34,12 +35,14 @@ public class CodeMetrics {
 	public CodeMetrics(String path, INDArray literalFeatures) {
 		this.path = path;
 		this.literalFeatures = literalFeatures;
+		this.relatedBugReportList = new ArrayList<BugReport>();
 	}
 	
 	public CodeMetrics(String path, INDArray literalFeatures, String text) {
 		this.path = path;
 		this.literalFeatures = literalFeatures;
 		this.text = text;
+		this.relatedBugReportList = new ArrayList<BugReport>();
 	}
 	
 	/**
@@ -91,7 +94,7 @@ public class CodeMetrics {
 	 * @return The index of the latest time of given time.
 	 */
 	public int locateChangePoint(long time) {
-		if (changeHistory[0] > time) 
+		if (changeHistory == null || changeHistory[0] > time) 
 			return -1;
 		int i = 0;
 		for (int index = 0; index < changeHistory.length; index++) {

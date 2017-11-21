@@ -2,7 +2,9 @@ package org.liwei.util;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileReader;
+import java.io.InputStreamReader;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map.Entry;
@@ -74,6 +76,10 @@ public class Index {
 		return vector;
 	}
 	
+	public void setText(String text) {
+		this.text = text;
+	}
+	
 	public String getText() {
 		return text;
 	}
@@ -131,9 +137,23 @@ public class Index {
 		try {
 			indices = readIndices(indexFile);
 			VectorFile vf = new VectorFile(vectorFile);
-			for (Entry<Integer, Index> index : indices.entrySet()) {
-				index.getValue().setVector(vf.get(index.getKey()));
+			// read textFile
+			BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(textFile), "UTF-8"));
+			HashMap<Integer, String> textMap = new HashMap<Integer, String>();
+ 			int lineNumber = 0;
+			String line = "";
+			while ((line = reader.readLine()) != null) {
+				textMap.put(lineNumber, line);
+				lineNumber++;
 			}
+			reader.close();
+			
+			for (Entry<Integer, Index> entry : indices.entrySet()) {
+				Index index = entry.getValue();
+				index.setVector(vf.get(entry.getKey()));
+				index.setText(textMap.get(entry.getKey()));
+			}
+			
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

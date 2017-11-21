@@ -13,8 +13,8 @@ public class RunLemmatizeThread extends RunAbstractThread {
 	}
 	
 	public static void main(String[] args) throws Exception {
-		String inputPath = "D:\\Data\\working\\good.txt";
-		String outputPath = "D:\\Data\\working\\good.s";
+		String inputPath = "D:\\Data\\working\\bad.txt";
+		String outputPath = "D:\\Data\\working\\bad.s";
 		RunLemmatizeThread rlt = new RunLemmatizeThread(inputPath, outputPath);
 		rlt.runThread();
 	}

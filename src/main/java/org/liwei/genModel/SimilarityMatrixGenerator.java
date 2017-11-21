@@ -25,6 +25,7 @@ import org.liwei.data.CodeRepository;
 import org.liwei.data.SimilarBugReport;
 import org.liwei.similarity.GetSimilarBugReport;
 import org.liwei.similarity.Similarity;
+import org.liwei.similarity.SimilarityGenerator;
 import org.liwei.util.DataTypeUtil.FileScore;
 import org.liwei.util.DataTypeUtil.FileScoreComparator;
 import org.liwei.util.Index;
@@ -127,7 +128,7 @@ public class SimilarityMatrixGenerator {
 	 */
 	private Similarity sim;
 	
-	private GetSimilarBugReport getSimilarBugReport;
+	private SimilarityGenerator simGenerator;
 	
 	/**
 	 * Constructor
@@ -141,7 +142,7 @@ public class SimilarityMatrixGenerator {
 			codeRepository.attachRelatedDTS(brRepository);
 		this.sim = sim;
 		
-		this.getSimilarBugReport = new GetSimilarBugReport(sim, brRepository);
+		this.simGenerator = new SimilarityGenerator(sim).setBugReports(brRepository.getBugReports());
 		this.maxGoodBadRate = MAX_GOOD_BAD_RATE;
 		minVote = Double.MAX_VALUE;
 		maxVote = Double.MIN_VALUE;
@@ -266,7 +267,7 @@ public class SimilarityMatrixGenerator {
 		if (br.getModifiedFiles().size() == 0) 
 			return new HashMap<String, INDArray>();
 		
-		List<SimilarBugReport> similarBrs = getSimilarBugReport.getSimilarBugReport(br, TOP_SIMILAR_DTS);
+		List<SimilarBugReport> similarBrs = simGenerator.getSimilarBugReports(br, TOP_SIMILAR_DTS);
 		
 		// vote for candidate files.
 		HashMap<String, Double> voteScores = new HashMap<String, Double>();

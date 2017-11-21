@@ -1,6 +1,7 @@
 package org.liwei.data;
 
 import java.util.Date;
+import java.util.HashSet;
 import java.util.Set;
 
 import  org.liwei.util.Index;
@@ -37,6 +38,7 @@ public class BugReport {
 		this.bugId = bugId;
 		this.commitDate = commitDate;
 		this.vector = vector;
+		this.modifiedFiles = new HashSet<Index>();
 	}
 	
 	public BugReport(String bugId, Date commitDate, INDArray vector, Set<Index> modifiedFiles) {

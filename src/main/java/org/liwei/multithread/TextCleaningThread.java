@@ -10,7 +10,7 @@ public class TextCleaningThread extends AbstractThread{
 
 	public TextCleaningThread(int threadSerial, List<String> document) {
 		super(threadSerial, document);
-		this.threadTag = "lemma";
+		this.threadTag = "textCleaning";
 		initializeStopWords();
 	}
 	
