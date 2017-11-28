@@ -87,6 +87,7 @@ public class GetChangedFiles {
 		//将每个bug修改的文件存储到destPath的bad目录下
 		File dir = new File(destPath + "work" + File.separator + repoName);
 		int total = 0;
+		int existedFile = 0;
 		int invalidFile = 0;
 		for (int i = 0; i < bugInfoList.size(); i++) {
 			BugInfo bugInfo = bugInfoList.get(i);
@@ -108,6 +109,9 @@ public class GetChangedFiles {
 				String destFileName = destPath + "bad" + File.separator + repoName + "#" + changedFileName + "#" + bugInfo.bugId + ".java";
 				String sourceFilePath = destPath + "work" + File.separator + repoName + File.separator + file;
 				File sourceFile = new File(sourceFilePath);
+				File destFile = new File(destFileName);
+				if (destFile.exists())
+					existedFile++;
 				if (sourceFile.exists()) 
 					invalidFile++;
 				FileUtil.copyFile(sourceFilePath, destFileName, true);
@@ -117,6 +121,6 @@ public class GetChangedFiles {
 				System.out.println("Processed bugs:" + i + "/" + bugInfoList.size());	
 			}
 		}
-		System.out.println("Processed finished, total " + total + " files! Invalid file num: " + invalidFile);
+		System.out.println("Processed finished, total " + total + " files! Existed file num: " + existedFile + ". Invalid file num: " + invalidFile);
 	}
 }

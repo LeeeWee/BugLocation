@@ -5,6 +5,7 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
@@ -487,7 +488,7 @@ public class SimilarityMatrixGenerator {
 		// Iterate bug report.
 		Integer qid = 1;
 		for (BugReport br : brRepository.getBugReports().values()) {
-			if ((qid % 100) == 0)
+			if ((qid % 20) == 0)
 				logger.info(qid.toString() + " records handled.");
 			qid++;
 			if (br.getModifiedFiles().size() == 0)
@@ -518,6 +519,47 @@ public class SimilarityMatrixGenerator {
 	}
 	
 	/**
+	 * generate unnormalized training data for svm-learn-to-rank.
+	 * @param outputFile outputFile to write.
+	 * @param isTraining
+	 */
+	public void generateUnnormalizedRankingMatrix(File outputFile, boolean isTraining) {
+		List<FileResult> finals = new LinkedList<FileResult>();
+		
+		// Iterate bug report.
+		Integer qid = 1;
+		for (BugReport br : brRepository.getBugReports().values()) {
+			if ((qid % 2) == 0)
+				logger.info(qid.toString() + " records handled.");
+			if ((qid % 2 == 0)) {
+				try {
+					BufferedWriter writer = new BufferedWriter(new FileWriter(outputFile, true));
+					for (FileResult result : finals) {
+						Integer rank;
+						if (result.isModified)
+							rank = TOP_SIMILAR_CODE;
+						else 
+							rank = 1;
+						writeRankingFeatures(writer, rank, result);
+					}
+					writer.close();
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+				finals.clear();
+			}
+			qid++;
+			if (br.getModifiedFiles().size() == 0)
+				continue;
+			
+			// Enumerate code files.
+			List<FileResult> vectors = generateRankingMatrix(br, qid, isTraining);
+			finals.addAll(vectors);
+		}
+		
+	}
+	
+	/**
 	 * Write a line to the vector file.
 	 * @param writer The writer on the file.
 	 * @param rank The rank of the vector.
@@ -528,8 +570,8 @@ public class SimilarityMatrixGenerator {
 			writer.write(rank.toString() + " qid:" + result.qid.toString());
 			for (Integer column = 1; column <= result.features.length; column++) {
 				writer.write(" " + column.toString() + ":" + result.features[column - 1]);
-				writer.write("\n");
 			}
+			writer.write("\n");
 		} catch (IOException e) {
 			e.printStackTrace();
 		}

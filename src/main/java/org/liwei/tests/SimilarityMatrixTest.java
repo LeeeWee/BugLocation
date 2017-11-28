@@ -49,7 +49,7 @@ public class SimilarityMatrixTest {
 				.build();
 		generator = new SimilarityMatrixGenerator(brRepository, codeRepository, sim);
 		
-		generator.generateRankingMatrix(new File(output), true);
+		generator.generateUnnormalizedRankingMatrix(new File(output), true);
 		generator.saveParameters(new File(parametersPath));
 	}
 	
