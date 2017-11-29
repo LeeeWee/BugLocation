@@ -461,17 +461,17 @@ public class SimilarityMatrixGenerator {
 					isModified = false;
 				vectors.add(new FileResult(codeMetrics.getPath(), isModified, v));
 			}
-			
-			// Sort and add to the final results.
-			vectors.sort(new FileComparator());
-			Integer count = 0;
-			for (FileResult result : vectors) {
-				result.qid = qid;
-				finals.add(result);
-				count++;
-				if (count >= TOP_SIMILAR_CODE)
-					break;
-			}
+		}
+		
+		// Sort and add to the final results.
+		vectors.sort(new FileComparator());
+		Integer count = 0;
+		for (FileResult result : vectors) {
+			result.qid = qid;
+			finals.add(result);
+			count++;
+			if (count >= TOP_SIMILAR_CODE)
+				break;
 		}
 		
 		return finals;
@@ -486,13 +486,16 @@ public class SimilarityMatrixGenerator {
 		List<FileResult> finals = new LinkedList<FileResult>();
 		
 		// Iterate bug report.
-		Integer qid = 1;
+		Integer qid = 0;
+		int lostBr = 0;
 		for (BugReport br : brRepository.getBugReports().values()) {
-			if ((qid % 20) == 0)
-				logger.info(qid.toString() + " records handled.");
 			qid++;
-			if (br.getModifiedFiles().size() == 0)
+			if ((qid % 500) == 0)
+				logger.info(qid.toString() + " records handled.");
+			if (br.getModifiedFiles().size() == 0) {
+				lostBr++;
 				continue;
+			}
 			
 			// Enumerate code files.
 			List<FileResult> vectors = generateRankingMatrix(br, qid, isTraining);
@@ -516,48 +519,11 @@ public class SimilarityMatrixGenerator {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+		
+		logger.info("Finished generating!");
+		logger.info("Total bug reports:" + qid + ",lost bug reports:" + lostBr);
 	}
 	
-	/**
-	 * generate unnormalized training data for svm-learn-to-rank.
-	 * @param outputFile outputFile to write.
-	 * @param isTraining
-	 */
-	public void generateUnnormalizedRankingMatrix(File outputFile, boolean isTraining) {
-		List<FileResult> finals = new LinkedList<FileResult>();
-		
-		// Iterate bug report.
-		Integer qid = 1;
-		for (BugReport br : brRepository.getBugReports().values()) {
-			if ((qid % 2) == 0)
-				logger.info(qid.toString() + " records handled.");
-			if ((qid % 2 == 0)) {
-				try {
-					BufferedWriter writer = new BufferedWriter(new FileWriter(outputFile, true));
-					for (FileResult result : finals) {
-						Integer rank;
-						if (result.isModified)
-							rank = TOP_SIMILAR_CODE;
-						else 
-							rank = 1;
-						writeRankingFeatures(writer, rank, result);
-					}
-					writer.close();
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-				finals.clear();
-			}
-			qid++;
-			if (br.getModifiedFiles().size() == 0)
-				continue;
-			
-			// Enumerate code files.
-			List<FileResult> vectors = generateRankingMatrix(br, qid, isTraining);
-			finals.addAll(vectors);
-		}
-		
-	}
 	
 	/**
 	 * Write a line to the vector file.
