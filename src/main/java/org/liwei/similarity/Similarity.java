@@ -102,6 +102,8 @@ public class Similarity {
 			HashMap<String, TokenScore> tokensScoreMap1) {
 		double simSum = 0.0;
 		double weights = 0.0;
+		if (tokensScoreMap0.size() == 0 || tokensScoreMap1.size() == 0) 
+			return 0.0;
 		for (Entry<String, TokenScore> entry0 : tokensScoreMap0.entrySet()) {
 			double sim = 0.0;
 			if(tokensScoreMap1.containsKey(entry0.getKey()))
@@ -196,6 +198,8 @@ public class Similarity {
 			HashMap<String, TokenScore> tokensScoreMap1) {
 		double simSum = 0.0;
 		double weights = 0.0;
+		if (tokensScoreMap0.size() == 0 || tokensScoreMap1.size() == 0)
+			return 0.0;
 		for (Entry<String, TokenScore> entry0 : tokensScoreMap0.entrySet()) {
 			double maxSim = 0.0;
 			for (Entry<String, TokenScore> entry1 : tokensScoreMap1.entrySet()) {
