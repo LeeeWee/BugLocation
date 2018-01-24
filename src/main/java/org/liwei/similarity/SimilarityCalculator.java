@@ -13,7 +13,7 @@ import org.liwei.data.SimilarBugReport.SimilarityComparator;
 import org.liwei.util.DataTypeUtil.FileScore;
 import org.liwei.util.DataTypeUtil.FileScoreComparator;
 
-public class SimilarityGenerator {
+public class SimilarityCalculator {
 	
 	/**
 	 * Instance of Similarity used to calculated similarity.
@@ -30,16 +30,16 @@ public class SimilarityGenerator {
 	 */
 	protected HashMap<String, CodeMetrics> codeMetricsSet;
 	
-	public SimilarityGenerator(Similarity sim) {
+	public SimilarityCalculator(Similarity sim) {
 		this.sim = sim;
 	}
 	
-	public SimilarityGenerator setBugReports(HashMap<String, BugReport> bugReports) {
+	public SimilarityCalculator setBugReports(HashMap<String, BugReport> bugReports) {
 		this.bugReports = bugReports;
 		return this;
 	}
 	
-	public SimilarityGenerator setCodeMetricsSet(HashMap<String, CodeMetrics> codeMetricsSet) {
+	public SimilarityCalculator setCodeMetricsSet(HashMap<String, CodeMetrics> codeMetricsSet) {
 		this.codeMetricsSet = codeMetricsSet;
 		return this;
 	}

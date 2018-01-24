@@ -20,6 +20,7 @@ public class BugReportRepository {
 	private static final String BUG_REPORT_VECTOR_PATH = "bug_report.v";
 	private static final String BAD_INDEX_PATH = "bad.i";
 	private static final String BAD_VECTOR_PATH = "bad.v";
+	private static final String BAD_TEXT_PATH = "bad.txt";
 	
 	/**
 	 * all bug reports in bug repository
@@ -114,27 +115,44 @@ public class BugReportRepository {
 	}
 
 	/**
-	 * get bug report by bugId
+	 * get bug report by bugId, if bugReports don't contain given bug, return null
 	 */
 	public BugReport get(String bugId) {
-		return bugReports.get(bugId);
+		if (bugReports.containsKey(bugId))
+			return bugReports.get(bugId);
+		else 
+			return null;
 	}
 	
 	/**
 	 * read bug report repository in the given directory
 	 * @param directory  the directory contains bug report index, vector, text file and bad file index, vector file.
-	 * @return
+	 * @return bugReportRepository
 	 */
 	public static BugReportRepository readBugReportRepository(String directory) {
+		return readBugReportRepository(directory, false);
+	}
+	
+	/**
+	 * read bug report repository in the given directory
+	 * @param directory  the directory contains bug report index, vector, text file and bad file index, vector file.
+	 * @param attachBadText if ture, attach bad text to bad indices
+	 * @return
+	 */
+	public static BugReportRepository readBugReportRepository(String directory, boolean attachBadText) {
 		logger.info("Reading bug report repository...");
-		if (!directory.endsWith("\\"))
-			directory += "\\";
-		File indexFile = new File(directory + BUG_REPORT_INDEX_PATH); 
-		File vectorFile = new File(directory + BUG_REPORT_VECTOR_PATH);
-		File textFile = new File(directory + BUG_REPORT_TEXT_PATH);
-		File badIndexFile = new File(directory + BAD_INDEX_PATH);
-		File badVectorFile = new File(directory + BAD_VECTOR_PATH);
-		HashMap<Integer, Index> badIndices = Index.readIndices(badIndexFile, badVectorFile);
+		File indexFile = new File(directory, BUG_REPORT_INDEX_PATH); 
+		File vectorFile = new File(directory, BUG_REPORT_VECTOR_PATH);
+		File textFile = new File(directory, BUG_REPORT_TEXT_PATH);
+		File badIndexFile = new File(directory, BAD_INDEX_PATH);
+		File badVectorFile = new File(directory, BAD_VECTOR_PATH);
+		HashMap<Integer, Index> badIndices;
+		if (attachBadText) {
+			File badTextFile = new File(directory, BAD_TEXT_PATH);
+			badIndices = Index.readIndices(badIndexFile, badVectorFile, badTextFile);
+		} else {
+			badIndices = Index.readIndices(badIndexFile, badVectorFile);
+		}
 		BugReportRepository repository = new BugReportRepository(indexFile, vectorFile, textFile);
 		repository.attachModifiedFiles(badIndices);
 		logger.info("Reading successed!");

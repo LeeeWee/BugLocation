@@ -1,4 +1,4 @@
-package org.liwei.buglocation;
+package org.liwei.common;
 
 import java.io.BufferedWriter;
 import java.io.FileOutputStream;

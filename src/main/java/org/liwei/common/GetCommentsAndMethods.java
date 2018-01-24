@@ -1,4 +1,4 @@
-package org.liwei.buglocation;
+package org.liwei.common;
 
 import java.util.List;
 
