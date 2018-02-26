@@ -1,8 +1,10 @@
 package org.liwei.buglocation.common;
 
+import java.io.File;
 import java.util.List;
 
 import org.liwei.buglocation.astparser.ASTCreator;
+import org.liwei.buglocation.utils.FileParser;
 import org.liwei.buglocation.utils.FileUtil;;
 
 public class GetCommentsAndMethods {
@@ -23,9 +25,9 @@ public class GetCommentsAndMethods {
 	public static void genCommentFile(String sourceFilePath) {
 		try {
 			String destFilePath = sourceFilePath + ".comment";
-			FileUtil.writeStringToFile(ASTCreator.getMethodsAndComments(FileUtil.readFileToString(sourceFilePath)), destFilePath); 
+			FileParser parser = new FileParser(new File(sourceFilePath));
+			FileUtil.writeStringToFile(parser.getMethodsAndComments(), destFilePath); 
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
 			System.out.println("file:" + sourceFilePath + " genCommentFile failed!");
 		}
 	}

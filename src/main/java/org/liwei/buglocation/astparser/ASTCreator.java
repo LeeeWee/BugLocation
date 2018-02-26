@@ -15,9 +15,17 @@ import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.liwei.buglocation.utils.FileUtil;
 
 public class ASTCreator {
+	/**
+	 * Code file content
+	 */
+	private String content;
+
+	public ASTCreator() {
+		content = null;
+	}
 	
-	public static String getFileContent(File file) {
-		return getFileContent(file.getAbsolutePath());
+	public void getFileContent(File file) {
+		getFileContent(file.getAbsolutePath());
 	}
 	
 	/**
@@ -25,8 +33,7 @@ public class ASTCreator {
 	 * @param absoluteFilePath input java file path
 	 * @return
 	 */
-	public static String getFileContent(String absoluteFilePath) {
-		String content = null;
+	public void getFileContent(String absoluteFilePath) {
 		try {
 			StringBuffer contentBuffer = new StringBuffer();
 			String line = null;
@@ -40,69 +47,27 @@ public class ASTCreator {
 		} catch (Exception ex) {
 			ex.printStackTrace();
 		}
-		return content;
 	}
 
-//	public static CompilationUnit getCompilationUnit() {
-//		ASTParser parser = ASTParser.newParser(AST.JLS8);
-//		parser.setSource(content.toCharArray());
-//		CompilationUnit compilationUnit = (CompilationUnit) parser.createAST(null);
-//		return compilationUnit;
-//	}
+	/**
+	 * get compilation unit
+	 * @param content input code content
+	 * @return
+	 */
+	public CompilationUnit getCompilationUnit() {
+		ASTParser parser = ASTParser.newParser(AST.JLS8);
+		parser.setSource(content.toCharArray());
+		parser.setKind(ASTParser.K_COMPILATION_UNIT);
+		CompilationUnit compilationUnit = (CompilationUnit) parser.createAST(null);
+		return compilationUnit;
+	}
 	
 	/**
-	 * get methods names and comments for given java code
+	 * @return the content
 	 */
-	public static String getMethodsAndComments(String str) throws Exception{
-		String resultStr = new String();
-		ASTParser parser = ASTParser.newParser(AST.JLS8);
-		parser.setSource(str.toCharArray());
-		parser.setKind(ASTParser.K_COMPILATION_UNIT);
- 
-		final CompilationUnit result = (CompilationUnit) parser.createAST(null);
- 
-		TypeDeclaration typeDec = (TypeDeclaration) result.types().get(0);
-		//System.out.println("class:" + typeDec.getName());
-		//System.out.println("class doc:" + typeDec.getJavadoc());
-		Javadoc classComment = typeDec.getJavadoc();
-		if (classComment == null)
-			resultStr = resultStr + typeDec.getName() + "\n";
-		else
-			resultStr = resultStr + typeDec.getName() + "\n" + classComment + "\n";
-		MethodDeclaration methodDec[] = typeDec.getMethods();
-
-		for (MethodDeclaration method : methodDec) {
-			//System.out.println(method);
-			//get method name
-			SimpleName methodName = method.getName();
-			//System.out.println("method:" + methodName);	
-			//get method comment
-			Javadoc methodComment = method.getJavadoc();
-			//System.out.println("method doc:" + methodComment);
-			if (methodComment == null)
-				resultStr = resultStr + methodName + "\n";
-			else 
-				resultStr = resultStr + methodName + "\n" + methodComment;
-//			//get method parameters
-//			List param = method.parameters();
-//			System.out.println("method parameters:" + param);
-//			//get method return type
-//			Type returnType=method.getReturnType2();  
-//            System.out.println("method return type:"+returnType);
-		}
-		//System.out.println(resultStr);
-		return resultStr;
+	public String getContent() {
+		return content;
 	}
-
-	public static void main(String[] args) {
-		try {
-			String filePath = "/Users/liwei/Documents/defect-prediction/open-source/eclipse.jdt.ui/org.eclipse.jdt.ui/ui/org/eclipse/jdt/ui/text/java/AbstractProposalSorter.java";
-			getMethodsAndComments(FileUtil.readFileToString(filePath));
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		// System.out.print("ParseFilesInDir();");
-	}
+	
 }
 

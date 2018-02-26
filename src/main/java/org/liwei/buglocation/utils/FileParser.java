@@ -16,10 +16,12 @@ import org.eclipse.jdt.core.dom.Javadoc;
 import org.eclipse.jdt.core.dom.LineComment;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.PackageDeclaration;
+import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
+import org.liwei.buglocation.astparser.ASTCreator;
 
 public class FileParser {
 	private CompilationUnit compilationUnit;
@@ -464,4 +466,44 @@ public class FileParser {
     	
     	return importedClasses;
     }
+    
+	/**
+	 * get methods names and comments for given java code
+	 */
+	public String getMethodsAndComments() throws Exception{
+		String resultStr = new String();
+ 
+		TypeDeclaration typeDec = (TypeDeclaration) compilationUnit.types().get(0);
+		//System.out.println("class:" + typeDec.getName());
+		//System.out.println("class doc:" + typeDec.getJavadoc());
+		Javadoc classComment = typeDec.getJavadoc();
+		if (classComment == null)
+			resultStr = resultStr + typeDec.getName() + "\n";
+		else
+			resultStr = resultStr + typeDec.getName() + "\n" + classComment + "\n";
+		MethodDeclaration methodDec[] = typeDec.getMethods();
+
+		for (MethodDeclaration method : methodDec) {
+			//System.out.println(method);
+			//get method name
+			SimpleName methodName = method.getName();
+			//System.out.println("method:" + methodName);	
+			//get method comment
+			Javadoc methodComment = method.getJavadoc();
+			//System.out.println("method doc:" + methodComment);
+			if (methodComment == null)
+				resultStr = resultStr + methodName + "\n";
+			else 
+				resultStr = resultStr + methodName + "\n" + methodComment;
+//			//get method parameters
+//			List param = method.parameters();
+//			System.out.println("method parameters:" + param);
+//			//get method return type
+//			Type returnType=method.getReturnType2();  
+//            System.out.println("method return type:"+returnType);
+		}
+		//System.out.println(resultStr);
+		return resultStr;
+	}
+
 }
