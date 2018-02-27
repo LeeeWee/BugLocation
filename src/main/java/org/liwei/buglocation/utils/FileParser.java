@@ -133,16 +133,21 @@ public class FileParser {
 		return splitContent(content);
 	}
 	
-	public String[] getContent() {
+	/**
+	 * get code file stemmed content words and remove all stopwords
+	 */
+	public String getContent() {
 		String tokensInSourceCode[] = Splitter.splitSourceCode(deleteNoNeededNode());
 		StringBuffer sourceCodeContentBuffer = new StringBuffer();
 		for (int i = 0; i < tokensInSourceCode.length; i++) {
 			String token = tokensInSourceCode[i];
-			sourceCodeContentBuffer.append((new StringBuilder(String.valueOf(token))).append(" ").toString());
+			if (Stopword.isJavaKeyword(token) || Stopword.isProjectKeyword(token) || Stopword.isEnglishStopword(token)) 
+				continue;
+			sourceCodeContentBuffer.append((new StringBuilder(String.valueOf(Stemmer.stem(token)))).append(" ").toString());
 		}
 
 		String content = sourceCodeContentBuffer.toString().toLowerCase();
-		return content.split(" ");
+		return content.trim();
 	}
 	
 	public String[] getClassNameAndMethodName() {

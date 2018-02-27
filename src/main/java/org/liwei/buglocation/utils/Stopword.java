@@ -61,20 +61,20 @@ public class Stopword
         for(int i = 0; i < javaKeywords.length; i++)
         {
             String word = javaKeywords[i].trim().toLowerCase();
-            word = Stem.stem(word);
+            word = Stemmer.stem(word);
             JAVA_KEYWORDS_STOP_WORD_SET.add(word);
         }
         
         String projectKeywords[] = {
                 "args", "method", "main", "param",
-                "aspectj", "swt", "eclipse", "zxing", "string", "java", "org", "javadoc"
+                "aspectj", "swt", "jdt", "eclipse", "tomcat", "birt", "zxing", "string", "java", "org", "javadoc"
                 };
         
         PROJECT_KEYWORDS_STOP_WORD_SET = new TreeSet<String>();
         for(int i = 0; i < projectKeywords.length; i++)
         {
             String word = projectKeywords[i].trim().toLowerCase();
-            word = Stem.stem(word);
+            word = Stemmer.stem(word);
             PROJECT_KEYWORDS_STOP_WORD_SET.add(word);
         }
 
@@ -142,7 +142,7 @@ public class Stopword
         for(int i = 0; i < EngStopWord.length; i++)
         {
             String word = EngStopWord[i].toLowerCase().trim();
-            word = Stem.stem(word);
+            word = Stemmer.stem(word);
             ENG_STOP_WORDS_SET.add(word);
         }
     }

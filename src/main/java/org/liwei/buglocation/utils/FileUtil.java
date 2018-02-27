@@ -339,6 +339,34 @@ public class FileUtil {
 	}
 	
 	/**
+	 * split string list
+	 * @param stringList input string list
+	 * @param cores num of list to split 
+	 * @return a list of list 
+	 */
+	public static List<List<String>> splitStringList(List<String> stringList, int cores) {
+		List<List<String>> result = new ArrayList<List<String>>();
+		int averN = stringList.size() / cores;
+		for (int i = 0; i < cores; i++) {
+			List<String> texts = new ArrayList<String>();
+			result.add(texts);
+		}
+		int n = 0;
+		int core = 0;
+		List<String> texts = result.get(core);
+		for (int i = 0; i < stringList.size(); i++) {
+			texts.add(stringList.get(i));
+			n++;
+			if (n > averN && core < cores) {
+				n = 0;
+				core++;
+				texts = result.get(core);
+			}
+		}
+		return result;
+	}
+	
+	/**
 	 * split documents
 	 * @param inputPath input file path
 	 * @param cores  num of documents to split 
@@ -348,24 +376,7 @@ public class FileUtil {
 		List<List<String>> splitDocument = new ArrayList<List<String>>();
 		try {
 			List<String> document = FileUtil.readFileToList(inputPath);
-
-			int averN = document.size() / cores;
-			for (int i = 0; i < cores; i++) {
-				List<String> texts = new ArrayList<String>();
-				splitDocument.add(texts);
-			}
-			int n = 0;
-			int core = 0;
-			List<String> texts = splitDocument.get(core);
-			for (int i = 0; i < document.size(); i++) {
-				texts.add(document.get(i));
-				n++;
-				if (n > averN && core < cores) {
-					n = 0;
-					core++;
-					texts = splitDocument.get(core);
-				}
-			}
+			splitDocument = splitStringList(document, cores);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}

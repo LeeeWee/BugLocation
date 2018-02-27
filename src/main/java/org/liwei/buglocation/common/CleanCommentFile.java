@@ -9,7 +9,12 @@ import java.util.Set;
 
 import org.liwei.buglocation.utils.FileUtil;
 
-public class TextCleaning {
+/**
+ * clean comment files which contain only methods' names and comments. 
+ * @author Liwei
+ *
+ */
+public class CleanCommentFile {
 
 	private static Set<String> stopWords = new HashSet<String>();
 

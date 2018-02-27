@@ -26,7 +26,7 @@ public abstract class AbstractThread extends Thread{
 			String line = document.get(n);
 			result.add(lineProcess(line));
 			if (n % 200 == 0) {
-				System.out.println(threadName + ":prcessed " + n + "lines.");
+				System.out.println(threadName + ":prcessed " + n + " lines.");
 			}
 		}
 		System.out.println(threadName + ":prcessed finished!");

@@ -11,17 +11,14 @@ package org.liwei.buglocation.utils;
 //Referenced classes of package utils:
 //PorterStemmer
 
-public class Stem
-{
-public Stem()
-{
-}
-
-public static String stem(String word)
-{
-PorterStemmer stemmer = new PorterStemmer();
-stemmer.reset();
-stemmer.stem(word);
-return stemmer.toString();
-}
+public class Stemmer {
+	
+	public Stemmer() {}
+	
+	public static String stem(String word) {
+		PorterStemmer stemmer = new PorterStemmer();
+		stemmer.reset();
+		stemmer.stem(word);
+		return stemmer.toString();
+	}
 }
