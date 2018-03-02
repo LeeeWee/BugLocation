@@ -1,18 +1,22 @@
 package org.liwei.buglocation.common;
 
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
 import java.util.List;
 
-import org.liwei.buglocation.astparser.ASTCreator;
-import org.liwei.buglocation.multithread.AbstractThread;
 import org.liwei.buglocation.utils.FileParser;
 import org.liwei.buglocation.utils.FileUtil;;
 
 public class GetFileContent {
 	
-	public static void main(String[] args) {
-		String dirPath = "D:\\Data\\working\\bad";
+	public static void main(String[] args) throws Exception {
+		String dirPath = "D:\\Data\\working\\good";
+		String destPath = "D:\\Data\\working\\good.txt";
 		genContentFileInDirectoryWithMultiThread(dirPath);
+		mergeContentFiles(dirPath, destPath);
 	}
 	
 	/**
@@ -106,20 +110,6 @@ public class GetFileContent {
 		System.out.println("genContentFiles finished!");
 	}
 	
-	/**
-	 * generate comment files for java file in given dirPath
-	 */
-	public static void genCommentFileInDirectory(String dirPath) {
-		List<String> files = FileUtil.getAllFiles(dirPath, ".java");
-		int fileCount = files.size();
-		for (int i = 0; i < fileCount; i++) {
-			getMethodsAndComments(files.get(i));
-			if(i % 500 == 0) {
-				System.out.println("genCommentFiles:" + i + "/" + fileCount);
-			}
-		}
-		System.out.println("genCommentFiles finished!");
-	}
 	
 	/**
 	 * get splitted content in code file and write into content file
@@ -136,16 +126,29 @@ public class GetFileContent {
 	}
 	
 	/**
-	 * get methods and comments in sourceFile and write into comment file, 
-	 * @param sourceFilePath
+	 * merge content files in given directory
 	 */
-	public static void getMethodsAndComments(String sourceFilePath) {
-		try {
-			String destFilePath = sourceFilePath + ".comment";
-			FileParser parser = new FileParser(new File(sourceFilePath));
-			FileUtil.writeStringToFile(parser.getMethodsAndComments(), destFilePath); 
-		} catch (Exception e) {
-			System.out.println("file:" + sourceFilePath + " genCommentFile failed!");
+	public static void mergeContentFiles(String dirPath, String destPath) throws Exception {
+		List<String> contentFiles = FileUtil.getAllFiles(dirPath, ".content");
+		BufferedWriter contentWriter = new BufferedWriter(new FileWriter(destPath));
+		BufferedWriter indexWriter = new BufferedWriter(new FileWriter(destPath.substring(0, destPath.lastIndexOf(".")) + ".i"));
+		for (int i = 0; i < contentFiles.size(); i++) {
+			String contentFile = contentFiles.get(i);
+			BufferedReader reader = new BufferedReader(new FileReader(contentFile));
+			String content = reader.readLine();
+			reader.close();
+			contentWriter.write(content + "\n");
+			String fileName = contentFile.substring(contentFile.lastIndexOf(File.separator) + 1);
+			String file = fileName.substring(0, fileName.lastIndexOf("#")).replace("#", "/") + ".java";
+			String commit = fileName.substring(fileName.lastIndexOf("#") + 1, fileName.indexOf(".java.content"));
+			String info = String.valueOf(i) + " " + commit + " " + file;
+			indexWriter.write(info + "\n");
+			if (i % 500 == 0) {
+				System.out.println("merge content files processing:" + i + "/" + contentFiles.size());
+			}
 		}
+		contentWriter.close();
+		indexWriter.close();
+		System.out.println("Finished text cleaning!");
 	}
 }

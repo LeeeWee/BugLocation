@@ -11,12 +11,94 @@ import org.liwei.buglocation.similarity.SortTokens.ScoreType;
 import org.liwei.buglocation.utils.DataTypeUtil.TokenScore;
 
 public class Similarity {
+	
+	public enum SimilarityType {
+		VSM, SAME_WORDS, WORD_VEC
+	}
+	
 	protected WordVectors vec;
 	protected SortTokens brSort;
 	protected SortTokens codeSort;
 	protected HashMap<String, HashMap<String, TokenScore>> brTopTokensMap;
 	protected HashMap<String, HashMap<String, TokenScore>> codeTopTokensMap;
 	
+	/**
+	 * similarity between bug report and metrics by given similairty type
+	 */
+	public double similarity(BugReport br, CodeMetrics metrics, SimilarityType type) {
+		double sim = 0;
+		switch (type) {
+			case VSM:
+				sim = vsmSimilarity(br, metrics);
+			case SAME_WORDS:
+				sim = similarityBySameWords(br, metrics);
+			case WORD_VEC:
+				sim = similarityByWordVectors(br, metrics);
+			default:
+				sim = vsmSimilarity(br, metrics); 
+		}
+		return sim;
+	}
+	
+	/**
+	 * similarity between bug reports by given similairty type
+	 */
+	public double similarity(BugReport br0, BugReport br1, SimilarityType type) {
+		double sim = 0;
+		switch (type) {
+			case VSM:
+				sim = vsmSimilarity(br0, br1);
+			case SAME_WORDS:
+				sim = similarityBySameWords(br0, br1);
+			case WORD_VEC:
+				sim = similarityByWordVectors(br0, br1);
+			default:
+				sim = vsmSimilarity(br0, br1); 
+		}
+		return sim;
+	}
+	
+	
+	/**
+	 * vsm similarity between bug report and code metrics, calculated by sum of same tokens' score product
+	 * @param br input bug report
+	 * @param metrics input code metrics
+	 * @return similarity between bug report and code
+	 */
+	public double vsmSimilarity(BugReport br, CodeMetrics metrics) {
+		HashMap<String, TokenScore> brTokensScoreMap = brTopTokensMap.get(br.getId());
+		HashMap<String, TokenScore> codeTokensScoreMap = codeTopTokensMap.get(metrics.getPath());
+		return vsmSimilarity(brTokensScoreMap, codeTokensScoreMap);
+	}
+	
+	/**
+	 * vsm similarity between bug reports, calculated by sum of same tokens' score product
+	 * @param br0 input first bug report
+	 * @param br1 input second bug report
+	 * @return similairty between two bug reports
+	 */
+	public double vsmSimilarity(BugReport br0, BugReport br1) {
+		HashMap<String, TokenScore> brTokensScoreMap0 = brTopTokensMap.get(br0.getId());
+		HashMap<String, TokenScore> brTokensScoreMap1 = brTopTokensMap.get(br1.getId());
+		return vsmSimilarity(brTokensScoreMap0, brTokensScoreMap1);
+	}
+	
+	/**
+	 * vsm similarity between token score maps, calculated by sum of same tokens' score product
+	 * @param tokensScoreMap0 input first tokensScoreMap
+	 * @param tokensScoreMap1 input second tokensScoreMap
+	 * @return vsm similarity between token score maps
+	 */
+	public double vsmSimilarity(HashMap<String, TokenScore> tokensScoreMap0,
+			HashMap<String, TokenScore> tokensScoreMap1) {
+		double sim = 0;
+		for (Entry<String, TokenScore> entry0 : tokensScoreMap0.entrySet()) {
+			if (tokensScoreMap1.containsKey(entry0.getKey())) {
+				sim += entry0.getValue().score * tokensScoreMap1.get(entry0.getKey()).score;
+			}
+		}
+		return sim;
+	}
 	
 	// similarity calculated by same words.
 	/**

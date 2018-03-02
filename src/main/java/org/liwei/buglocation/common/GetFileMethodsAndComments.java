@@ -7,6 +7,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.liwei.buglocation.utils.FileParser;
 import org.liwei.buglocation.utils.FileUtil;
 
 /**
@@ -14,17 +15,46 @@ import org.liwei.buglocation.utils.FileUtil;
  * @author Liwei
  *
  */
-public class CleanCommentFile {
+public class GetFileMethodsAndComments {
 
 	private static Set<String> stopWords = new HashSet<String>();
 
 	public static void main(String[] args) {
 		String dirPath = "D:\\Data\\working\\bad\\";
 		String destPath = "D:\\Data\\working\\bad.txt";
-		cleanBadFiles(dirPath, destPath);
+		mergeBadCommentFiles(dirPath, destPath);
 	}
 	
-	public static void cleanBadFiles(String dirPath, String destPath) {
+	/**
+	 * generate comment files for java file in given dirPath
+	 */
+	public static void genCommentFileInDirectory(String dirPath) {
+		List<String> files = FileUtil.getAllFiles(dirPath, ".java");
+		int fileCount = files.size();
+		for (int i = 0; i < fileCount; i++) {
+			getMethodsAndComments(files.get(i));
+			if(i % 500 == 0) {
+				System.out.println("genCommentFiles:" + i + "/" + fileCount);
+			}
+		}
+		System.out.println("genCommentFiles finished!");
+	}
+	
+	/**
+	 * get methods and comments in sourceFile and write into comment file, 
+	 * @param sourceFilePath
+	 */
+	public static void getMethodsAndComments(String sourceFilePath) {
+		try {
+			String destFilePath = sourceFilePath + ".comment";
+			FileParser parser = new FileParser(new File(sourceFilePath));
+			FileUtil.writeStringToFile(parser.getMethodsAndComments(), destFilePath); 
+		} catch (Exception e) {
+			System.out.println("file:" + sourceFilePath + " genCommentFile failed!");
+		}
+	}
+	
+	public static void mergeBadCommentFiles(String dirPath, String destPath) {
 		initializeStopWords();
 		List<String> commentFiles = FileUtil.getAllFiles(dirPath, ".comment");
 		String allComments = new String();
@@ -50,7 +80,7 @@ public class CleanCommentFile {
 		}
 	}
 
-	public static void cleanGoodFiles(String dirPath, String destPath) {
+	public static void mergeGoodCommentFiles(String dirPath, String destPath) {
 		initializeStopWords();
 		List<String> commentFiles = FileUtil.getAllFiles(dirPath, ".comment");
 		String allComments = new String();
